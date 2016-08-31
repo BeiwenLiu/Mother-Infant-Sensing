@@ -2,7 +2,7 @@
 """
 Created on Tue Aug 30 21:36:31 2016
 
-@author: MacbookRetina
+@author: Beiwen Liu
 """
 
 import pandas as pd
@@ -32,16 +32,19 @@ def createDF(start,end,delta,action):
     start = datetime.datetime.strptime(start, '%H:%M:%S.%f')
     end = datetime.datetime.strptime(end, '%H:%M:%S.%f')
     current = start
-    df = pd.DataFrame(columns=['Date','Action'])
+    df = pd.DataFrame(columns=['Time','Action'])
     a = []
     while current < end:
-        a.append(current)
+        a.append(stringConverter(current))
         current += delta
     
-    df['Date'] = a
+    df['Time'] = a
     df['Action'] = action
     return df
 
+def stringConverter(datet):
+    ans = datet.strftime('%H:%M:%S.%f')[:-3]
+    return ans
 
 multipleParse()
     
