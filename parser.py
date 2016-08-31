@@ -9,9 +9,14 @@ import pandas as pd
 import datetime as datetime
 from datetime import date, timedelta
 
+def multipleParse():
+    files = ['testing.html','testing2.html']
+    
+    for file in files:
+        parse(file)
 
-def parse():
-    df = pd.read_html('testing2.html')
+def parse(fileName):
+    df = pd.read_html(fileName)
     number = len(df[0][1])
     
     for x in range(0,number,4):
@@ -19,18 +24,26 @@ def parse():
         timestamp = df[0][1][x+2]
         start,end = timestamp.split(' - ')
         print 'Initializing conversion'
-        convert(start,end,timedelta(microseconds=100000))
+        tempDf = createDF(start,end,timedelta(microseconds=100000),action)
+        print tempDf.head()
     
-def convert(start,end,delta):
+def createDF(start,end,delta,action):
     
     start = datetime.datetime.strptime(start, '%H:%M:%S.%f')
     end = datetime.datetime.strptime(end, '%H:%M:%S.%f')
     current = start
+    df = pd.DataFrame(columns=['Date','Action'])
+    a = []
     while current < end:
+        a.append(current)
         current += delta
-        print current
     
-parse()
+    df['Date'] = a
+    df['Action'] = action
+    return df
+
+
+multipleParse()
     
     
     
