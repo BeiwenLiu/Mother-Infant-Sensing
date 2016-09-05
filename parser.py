@@ -22,6 +22,8 @@ def parse(fileName):
     df = pd.read_html(fileName)
     number = len(df[0][1])
     tierNames = findTiers(fileName)
+    startFrame, time = findBeginning(fileName)
+    print startFrame, time
     for element in tierNames:
         sa = pd.DataFrame(columns=['Time','Action'])
         for x in range(0,number,4):
@@ -35,12 +37,16 @@ def parse(fileName):
                 sa=sa.append(tempDf)
         print "element:", element
         print sa
+        sa.to_csv("{}.csv".format(element))
     
 #Creates dataframe and spans time across interval
 def createDF(start,end,delta,action):
-    
-    start = datetime.datetime.strptime(start, '%H:%M:%S.%f')
-    end = datetime.datetime.strptime(end, '%H:%M:%S.%f')
+    unixT = unix('2056-05-05','00:53:12')
+    print unixT
+    start = stringToTime(start)
+    end = stringToTime(end)
+    start = roundTime(start)
+    end = roundTime(end)
     current = start
     df = pd.DataFrame(columns=['Time','Action'])
     a = []
@@ -52,13 +58,22 @@ def createDF(start,end,delta,action):
     df['Action'] = action
     return df
 
+#Rounds to nearest tenth of second. Input must be of type dateTime
 def roundTime(time):
-    print "----------------"
-    print time
-    x = timedelta(seconds = 10)
-    print time % x
-    print "----------------"
-#
+    x = timedelta(microseconds = 100000)
+    ans = int(time.strftime('%f')[-5])
+    if (ans >= 5):
+        time = time + x
+    time = stringConverter(time)
+    time = stringToTime(time)
+    
+    return time
+
+#Give input of String "00:00:00.00" and it will return type datetime
+def stringToTime(arg):
+    return datetime.datetime.strptime(arg, '%H:%M:%S.%f')
+    
+#Give an input of type datetime and it will return String "00:00:00.0"
 def stringConverter(datet):
     ans = datet.strftime('%H:%M:%S.%f')[:-5]
     return ans
@@ -71,20 +86,42 @@ def findTiers(filename):
     for x in range(0,number,4):
         tempElement = temp[0][1][x]
         answer = False
+        if tempElement == "Start":
+            answer = True
         for element in a:
             if element == tempElement:
                 answer = True
         if answer == False:
             a.append(tempElement)
-            
     return a
-    
-def unix():
-    a = date(2010,9,01)
+
+def findBeginning(filename):
+    temp = pd.read_html(filename)
+    number = len(temp[0][1])
+    for x in range(0,number,4):
+        tempElement = temp[0][1][x]
+        timestamp = temp[0][1][x+2]
+        if tempElement == "Start":
+            start,end = timestamp.split(' - ')
+            start = stringToTime(start)
+            start = roundTime(start)
+            df = pd.DataFrame(columns=['Time','Action'])
+            df['Time'] = [stringConverter(start)]
+            df['Action'] = [tempElement]
+            print df
+            return df
+            
+findBeginning('tiertesting.html')           
+
+ 
+def unix(dateStamp,timeStamp):
+    a = datetime.datetime.strptime(dateStamp,'%Y-%m-%d').date()
     dateUnix = mktime(a.timetuple())
-    x = time.strptime('00:01:00.000'.split('.')[0],'%H:%M:%S')
+    x = time.strptime(timeStamp.split('.')[0],'%H:%M:%S')
     timeUnix = datetime.timedelta(hours=x.tm_hour,minutes=x.tm_min,seconds=x.tm_sec).total_seconds()
-    print dateUnix+timeUnix
-    
-    
-unix()
+    return dateUnix+timeUnix
+  
+
+#Add rounding
+#improve unix timestamp
+#export to csv
