@@ -11,6 +11,7 @@ import datetime as datetime
 from datetime import date, timedelta
 from time import mktime
 import time
+import calendar
 
 def multipleParse():
     files = ['tierTesting.html']
@@ -22,9 +23,10 @@ def multipleParse():
 def parse(fileName):
     df = pd.read_html(fileName)
     number = len(df[0][1])
+    unixTime = unix('2056-05-05','00:53:12')
     increment = timedelta(microseconds=100000)
     tierNames = findTiers(fileName)
-    
+    startFrame, timeOffset = findBeginning(fileName)
     for element in tierNames:
         startFrame, time = findBeginning(fileName)
         sa = pd.DataFrame(columns=['Time','Action'])
@@ -35,8 +37,8 @@ def parse(fileName):
                 timestamp = df[0][1][x+2]
                 start,end = timestamp.split(' - ')
                 print 'Initializing conversion'
-                firstDf = createDF(time, start,increment)
-                tempDf = createDF(start,end,increment,action)
+                firstDf = createDF(time, start,increment,timeOffset)
+                tempDf = createDF(start,end,increment,timeOffset,action)
                 sa = pd.concat([sa,firstDf],ignore_index=True)
                 sa = pd.concat([sa,tempDf],ignore_index=True)
                 time = end
@@ -45,9 +47,8 @@ def parse(fileName):
         sa.to_csv("{}.csv".format(element))
     
 #Creates dataframe and spans time across interval
-def createDF(start,end,delta,action = ""):
-    unixT = unix('2056-05-05','00:53:12')
-    print unixT
+def createDF(start,end,delta,offset,action = ""):
+    #unix goes here
     start = stringToTime(start)
     end = stringToTime(end)
     start = roundTime(start)
@@ -55,6 +56,8 @@ def createDF(start,end,delta,action = ""):
     current = start
     df = pd.DataFrame(columns=['Time','Action'])
     a = []
+    offsetSeconds = computeSecondOffset(offset)
+    offsetSeconds = timedelta(seconds = offsetSeconds)
     while current < end:
         a.append(stringConverter(current))
         current += delta
@@ -102,6 +105,7 @@ def findTiers(filename):
     return a
 
 #finds Start and its time for offset
+#Must designate starting time with a separate tier named "Start"
 def findBeginning(filename):
     temp = pd.read_html(filename)
     number = len(temp[0][1])
@@ -118,15 +122,20 @@ def findBeginning(filename):
             df['Action'] = [tempElement]
             return df, start
                       
-
+#Takes in string '00:00:00' and computes total amount of seconds (including microseconds) into float form
+def computeSecondOffset(offset):
+    offset2 = float(offset[-2:])
+    offset = time.strptime(offset.split('.')[0],'%H:%M:%S')
+    offsetSeconds = datetime.timedelta(hours=offset.tm_hour,minutes=offset.tm_min,seconds=offset.tm_sec).total_seconds()
+    return offsetSeconds + offset2
  
 def unix(dateStamp,timeStamp):
     a = datetime.datetime.strptime(dateStamp,'%Y-%m-%d').date()
-    dateUnix = mktime(a.timetuple())
+    #dateUnix = mktime(a.timetuple()) for local timezone
+    dateUnix = calendar.timegm(a.timetuple()) #for UTC timezone
     x = time.strptime(timeStamp.split('.')[0],'%H:%M:%S')
     timeUnix = datetime.timedelta(hours=x.tm_hour,minutes=x.tm_min,seconds=x.tm_sec).total_seconds()
     return dateUnix+timeUnix
-  
 
 #Add rounding
 #improve unix timestamp
@@ -134,3 +143,5 @@ def unix(dateStamp,timeStamp):
 #finds start time
 
 multipleParse()
+
+print unix("1970-01-01","00:00:01")
