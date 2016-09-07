@@ -23,7 +23,7 @@ def multipleParse():
 def parse(fileName):
     df = pd.read_html(fileName)
     number = len(df[0][1])
-    unixTime = unix('2056-05-05','00:53:12')
+    unixTime = unix('00:53:12','1970-01-02')
     increment = timedelta(microseconds=100000)
     tierNames = findTiers(fileName)
     startFrame, timeOffset = findBeginning(fileName)
@@ -37,8 +37,8 @@ def parse(fileName):
                 timestamp = df[0][1][x+2]
                 start,end = timestamp.split(' - ')
                 print 'Initializing conversion'
-                firstDf = createDF(time, start,increment,timeOffset)
-                tempDf = createDF(start,end,increment,timeOffset,action)
+                firstDf = createDF(time, start,increment,timeOffset,unixTime)
+                tempDf = createDF(start,end,increment,timeOffset,unixTime,action)
                 sa = pd.concat([sa,firstDf],ignore_index=True)
                 sa = pd.concat([sa,tempDf],ignore_index=True)
                 time = end
@@ -47,8 +47,7 @@ def parse(fileName):
         sa.to_csv("{}.csv".format(element))
     
 #Creates dataframe and spans time across interval
-def createDF(start,end,delta,offset,action = ""):
-    #unix goes here
+def createDF(start,end,delta,offset,unixTime,action = ""):
     start = stringToTime(start)
     end = stringToTime(end)
     start = roundTime(start)
@@ -59,7 +58,8 @@ def createDF(start,end,delta,offset,action = ""):
     offsetSeconds = computeSecondOffset(offset)
     offsetSeconds = timedelta(seconds = offsetSeconds)
     while current < end:
-        a.append(stringConverter(current))
+        temp = current - offsetSeconds
+        a.append(unix(stringConverter(temp))+unixTime) #stringConverter(current) for time representation
         current += delta
     
     df['Time'] = a
@@ -129,13 +129,14 @@ def computeSecondOffset(offset):
     offsetSeconds = datetime.timedelta(hours=offset.tm_hour,minutes=offset.tm_min,seconds=offset.tm_sec).total_seconds()
     return offsetSeconds + offset2
  
-def unix(dateStamp,timeStamp):
+def unix(timeStamp,dateStamp="1970-01-01"):
     a = datetime.datetime.strptime(dateStamp,'%Y-%m-%d').date()
     #dateUnix = mktime(a.timetuple()) for local timezone
     dateUnix = calendar.timegm(a.timetuple()) #for UTC timezone
     x = time.strptime(timeStamp.split('.')[0],'%H:%M:%S')
     timeUnix = datetime.timedelta(hours=x.tm_hour,minutes=x.tm_min,seconds=x.tm_sec).total_seconds()
-    return dateUnix+timeUnix
+    timeUnix2 = float(timeStamp[-2:])
+    return dateUnix+timeUnix+timeUnix2
 
 #Add rounding
 #improve unix timestamp
@@ -143,5 +144,3 @@ def unix(dateStamp,timeStamp):
 #finds start time
 
 multipleParse()
-
-print unix("1970-01-01","00:00:01")
