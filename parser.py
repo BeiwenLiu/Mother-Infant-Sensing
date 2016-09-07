@@ -4,7 +4,6 @@ Created on Tue Aug 30 21:36:31 2016
 
 @author: Beiwen Liu
 """
-import math
 import numpy as np
 import pandas as pd
 import datetime as datetime
@@ -13,6 +12,7 @@ from time import mktime
 import time
 import calendar
 
+#specify files here
 def multipleParse():
     files = ['tierTesting.html']
     
@@ -21,9 +21,10 @@ def multipleParse():
         
 #identifies time range and action from HTML table
 def parse(fileName):
+#specify Date and Time at Start Here    
+    unixTime = unix('00:00:00.0','1970-01-01')
     df = pd.read_html(fileName)
     number = len(df[0][1])
-    unixTime = unix('00:53:12','1970-01-02')
     increment = timedelta(microseconds=100000)
     tierNames = findTiers(fileName)
     startFrame, timeOffset = findBeginning(fileName)
@@ -32,7 +33,7 @@ def parse(fileName):
         sa = pd.DataFrame(columns=['Time','Action'])
         for x in range(0,number,4):
             if element == df[0][1][x]:
-                print "tier", df[0][1][x]
+                print "tier:", df[0][1][x]
                 action = df[0][1][x + 1]
                 timestamp = df[0][1][x+2]
                 start,end = timestamp.split(' - ')
@@ -59,7 +60,9 @@ def createDF(start,end,delta,offset,unixTime,action = ""):
     offsetSeconds = timedelta(seconds = offsetSeconds)
     while current < end:
         temp = current - offsetSeconds
-        a.append(unix(stringConverter(temp))+unixTime) #stringConverter(current) for time representation
+        #a.append(unix(stringConverter(temp))+unixTime) 
+        a.append(stringConverter(current))
+        #stringConverter(current) for time representation
         current += delta
     
     df['Time'] = a
@@ -128,7 +131,8 @@ def computeSecondOffset(offset):
     offset = time.strptime(offset.split('.')[0],'%H:%M:%S')
     offsetSeconds = datetime.timedelta(hours=offset.tm_hour,minutes=offset.tm_min,seconds=offset.tm_sec).total_seconds()
     return offsetSeconds + offset2
- 
+
+
 def unix(timeStamp,dateStamp="1970-01-01"):
     a = datetime.datetime.strptime(dateStamp,'%Y-%m-%d').date()
     #dateUnix = mktime(a.timetuple()) for local timezone
@@ -137,10 +141,5 @@ def unix(timeStamp,dateStamp="1970-01-01"):
     timeUnix = datetime.timedelta(hours=x.tm_hour,minutes=x.tm_min,seconds=x.tm_sec).total_seconds()
     timeUnix2 = float(timeStamp[-2:])
     return dateUnix+timeUnix+timeUnix2
-
-#Add rounding
-#improve unix timestamp
-#export to csv
-#finds start time
 
 multipleParse()
