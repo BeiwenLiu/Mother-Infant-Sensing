@@ -14,7 +14,7 @@ import calendar
 
 #specify files here
 def multipleParse():
-    files = ['tierTesting.html']
+    files = ['html/tierTesting.html']
     
     for file in files:
         parse(file)
@@ -45,7 +45,7 @@ def parse(fileName):
                 time = end
         print "element:", element
         print sa
-        sa.to_csv("{}.csv".format(element))
+        sa.to_csv("csv/{}.csv".format(element))
     
 #Creates dataframe and spans time across interval
 def createDF(start,end,delta,offset,unixTime,action = ""):
