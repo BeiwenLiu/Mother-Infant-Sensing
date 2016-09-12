@@ -46,15 +46,15 @@ def practice(filename):
             x = s.readline().split("\t")
         else:
             timeDf = createDFTime(timeOffset,end,increment,unixTime,timeOffset)
-            print timeDf
             sa = timeDf.merge(sa,on="Time",how="left")
-            print sa
-            sa.to_csv("csv/{}.csv".format(tier))
+            labelAnnotations(tier,sa)
+            #sa.to_csv("csv/{}.csv".format(tier))
             sa = pd.DataFrame(columns=['Time','Action'])
             index = index + 1
     timeDf = createDFTime(timeOffset,end,increment,unixTime,timeOffset)
     sa = timeDf.merge(sa,on="Time",how="left")
-    sa.to_csv("csv/{}.csv".format(tier))
+    labelAnnotations(tier,sa)
+    #sa.to_csv("csv/{}.csv".format(tier))
     
             
     
@@ -247,8 +247,8 @@ def unix(timeStamp,dateStamp="1970-01-01"):
     return dateUnix+timeUnix+timeUnix2
     
     
-def labelAnnotations(tierName):
-    temp = pd.read_csv(tierName, index_col=0)
+def labelAnnotations(tierName,dataframe):
+    temp = dataframe
     
     uniqueValues = np.unique(temp[['Action']])
     
@@ -280,9 +280,9 @@ def labelAnnotations(tierName):
             print "Changing index: ", x
             sa[action[x]].iloc[x] = 1
             
-    sa.to_csv("testing.csv")
+    sa.to_csv("csv/{}.csv".format(tierName))
 
 
-practice('elan example.txt')
+practice('P1_e20160630_174419_013088.txt')
 
 #labelAnnotations("csv/Comments.csv")
