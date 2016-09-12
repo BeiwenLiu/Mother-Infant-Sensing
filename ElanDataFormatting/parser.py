@@ -37,20 +37,23 @@ def parse(fileName):
     
     #startFrame, timeOffset = findBeginning(fileName)
     timeOffset = "00:00:00.0"
+    counter = 0
     for element in tierNames:
         #startFrame, time = findBeginning(fileName)
         sa = pd.DataFrame(columns=['Time','Action'])
         x = 0
         while x < number:
             if element == df[0][1][x]:
-                print "tier:", df[0][1][x]
+                print "count", counter
+                counter = counter + 1
+                #print "tier:", df[0][1][x]
                 action = df[0][1][x + 1]
                 timestamp = df[0][1][x+2]
-                print "action:",action
-                print"timestamp:",timestamp
-                print"S1",df[0][1][x+3]
+                #print "action:",action
+                #print"timestamp:",timestamp
+                #print"S1",df[0][1][x+3]
                 start,end = timestamp.split(' - ')
-                print 'Initializing conversion'
+                #print 'Initializing conversion'
                 #firstDf = createDF(time, start,increment,unixTime,timeOffset)
                 tempDf = createDF(start,end,increment,unixTime,timeOffset,action)
                 #sa = pd.concat([sa,firstDf],ignore_index=True)
@@ -190,6 +193,45 @@ def findTiers(filename):
         else:
             x += 4
     return a
+    
+def labelAnnotations(tierName):
+    temp = pd.read_csv(tierName, index_col=0)
+    
+    uniqueValues = np.unique(temp[['Action']])
+    
+    counter = 0
+    index = 0
+    for m in uniqueValues:
+        m = str(m)
+        if m == 'nan':
+            index = counter
+        counter = counter + 1
+        
+    uniqueValues = np.delete(uniqueValues, index)
+    
+    print uniqueValues
+    
+    df = pd.DataFrame(columns=uniqueValues)
+    zero = np.zeros(len(temp), dtype=np.int)
+   
+    for element in uniqueValues:
+        df[element] = zero
+        
+    sa = temp.join(df,how="left")
+    
+    action = temp['Action']
+    
+    
+    for x in range(0,len(temp)):
+        if action[x] in uniqueValues[:]:
+            print "Changing index: ", x
+            sa[action[x]].iloc[x] = 1
+            
+    sa.to_csv("testing.csv")
+    
+
+#labelAnnotations("csv/Comments.csv")
+    
 
 #finds Start and its time for offset
 #Must designate starting time with a separate tier named "Start"
@@ -226,4 +268,7 @@ def unix(timeStamp,dateStamp="1970-01-01"):
     timeUnix2 = float(timeStamp[-2:])
     return dateUnix+timeUnix+timeUnix2
 
-multipleParse(['html/tiertesting.html'],False)
+multipleParse(['html/p1.html'],True)
+
+
+    
