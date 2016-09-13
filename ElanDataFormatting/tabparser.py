@@ -254,14 +254,14 @@ def labelAnnotations(tierName,dataframe):
     
     counter = 0
     index = 0
-    for m in uniqueValues:
+    """for m in uniqueValues:
         m = str(m)
         if m == 'nan':
             index = counter
         counter = counter + 1
         
     uniqueValues = np.delete(uniqueValues, index)
-    
+    """
     print uniqueValues
     
     df = pd.DataFrame(columns=uniqueValues)
@@ -280,9 +280,10 @@ def labelAnnotations(tierName,dataframe):
             print "Changing index: ", x
             sa[action[x]].iloc[x] = 1
             
+    sa = sa.drop(float('NaN'),axis=1)
     sa.to_csv("csv/{}.csv".format(tierName))
 
 
-practice('P1_e20160630_174419_013088.txt')
-
+#txt file must be in txt/filename.txt
+practice('elan example.txt')
 #labelAnnotations("csv/Comments.csv")

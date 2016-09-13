@@ -80,11 +80,11 @@
         <pref key="*MAF">
             <Object class="java.awt.Color">90,160,90</Object>
         </pref>
-        <pref key="*CHF">
-            <Object class="java.awt.Color">0,160,90</Object>
-        </pref>
         <pref key="*NON">
             <Object class="java.awt.Color">90,90,0</Object>
+        </pref>
+        <pref key="*CHF">
+            <Object class="java.awt.Color">0,160,90</Object>
         </pref>
         <pref key="*FAN">
             <Object class="java.awt.Color">90,160,160</Object>
@@ -259,7 +259,7 @@
         <Boolean>false</Boolean>
     </pref>
     <pref key="MediaTime">
-        <Long>3880</Long>
+        <Long>6140</Long>
     </pref>
     <pref key="ExportTabDialog.SelectTiersMode">
         <String>Tier</String>
@@ -330,11 +330,11 @@
         <String>%com@FAN</String>
     </pref>
     <prefGroup key="CommentViewer.Columns">
-        <pref key="Sender">
-            <Int>0</Int>
-        </pref>
         <pref key="Modification Date">
             <Int>75</Int>
+        </pref>
+        <pref key="Sender">
+            <Int>0</Int>
         </pref>
         <pref key="Tier">
             <Int>75</Int>
@@ -345,20 +345,20 @@
         <pref key="Initials">
             <Int>75</Int>
         </pref>
-        <pref key="Start Time">
+        <pref key="Comment">
             <Int>75</Int>
         </pref>
         <pref key="End Time">
             <Int>75</Int>
         </pref>
-        <pref key="Comment">
-            <Int>75</Int>
-        </pref>
-        <pref key="Thread">
+        <pref key="Start Time">
             <Int>75</Int>
         </pref>
         <pref key="Recipient">
             <Int>0</Int>
+        </pref>
+        <pref key="Thread">
+            <Int>75</Int>
         </pref>
     </prefGroup>
     <pref key="TimeScaleBeginTime">
