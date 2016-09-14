@@ -12,7 +12,7 @@ from time import mktime
 import time
 import calendar
 
-def practice(filename):
+def startParse(filename):
 
     
     
@@ -21,6 +21,7 @@ def practice(filename):
                
     unixTime = unix(time,date)
     tiers = findTiers(filename)
+    print tiers
     increment = timedelta(microseconds=100000)
     
     index = 0
@@ -248,6 +249,7 @@ def unix(timeStamp,dateStamp="1970-01-01"):
     
     
 def labelAnnotations(tierName,dataframe):
+    print tierName
     temp = dataframe
     
     uniqueValues = np.unique(temp[['Action']])
@@ -280,10 +282,12 @@ def labelAnnotations(tierName,dataframe):
             print "Changing index: ", x
             sa[action[x]].iloc[x] = 1
             
-    sa = sa.drop(float('NaN'),axis=1)
+    if len(uniqueValues) > 1:        
+        sa = sa.drop(float('NaN'),axis=1)
+    print sa
     sa.to_csv("csv/{}.csv".format(tierName))
 
 
 #txt file must be in txt/filename.txt
-practice('elan example.txt')
+startParse('testing.txt')
 #labelAnnotations("csv/Comments.csv")
