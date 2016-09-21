@@ -11,6 +11,7 @@ from datetime import date, timedelta
 from time import mktime
 import time
 import calendar
+import matplotlib.pyplot as plt
 
 def startParse(filename):
 
@@ -237,7 +238,6 @@ def stringConverter(datet):
     ans = datet.strftime('%H:%M:%S.%f')[:-5]
     return ans
     
-    
 def unix(timeStamp,dateStamp="1970-01-01"):
     a = datetime.datetime.strptime(dateStamp,'%Y-%m-%d').date()
     #dateUnix = mktime(a.timetuple()) for local timezone
@@ -284,10 +284,9 @@ def labelAnnotations(tierName,dataframe):
             
     if len(uniqueValues) > 1:        
         sa = sa.drop(float('NaN'),axis=1)
-    print sa
-    sa.to_csv("csv/{}.csv".format(tierName))
+    sa.to_csv('csv/{}.csv'.format(tierName))
 
 
 #txt file must be in txt/filename.txt
-startParse('testing.txt')
+startParse('P1_e20160630_174419_013088.txt')
 #labelAnnotations("csv/Comments.csv")
