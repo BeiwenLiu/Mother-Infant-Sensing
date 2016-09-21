@@ -39,11 +39,10 @@ def graph(filename):
     
     df = df[uniqueValues]
     df = df.append(tempDf)
-    plt.subplot(121)
     ax = df[uniqueValues].plot()
     ax.set_ylim(0,2)
     ax.set_xlim(0,index)
-    
+    plt.show()
     
 def histogram(filename):
     s = open('txt/{}'.format(filename), 'r')
@@ -69,7 +68,6 @@ def histogram(filename):
             keepGoing = True
         else:
             if keepGoing:
-                print sa
                 labelAnnotations(tier,sa)
                 keepGoing = False
             
@@ -98,7 +96,6 @@ def labelAnnotations(tierName,dataframe):
     sa = pd.concat([sa,temp],ignore_index=True)
     
     
-    graph("{}.csv".format(tierName))
     calculateTotal(sa)
     
     plotHistogram(sa)
@@ -115,13 +112,12 @@ def plotHistogram(sa):
         answer.append(stringToTime(row1[number + 1]) - stringToTime(row2[number]))
         
     sa['Gap'] = answer
-    plt.subplot(122)
     sa['Gap'].hist(bins = 20, facecolor='g')
     
     plt.xlabel('Time in Seconds')
     plt.ylabel('Occurences')
     plt.title('Histogram of gaps between occurences')
-    
+    plt.show()
     
 def calculateTotal(sa):
     row3 = sa['Duration']

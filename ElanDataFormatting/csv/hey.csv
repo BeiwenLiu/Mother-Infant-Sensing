@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ,Time,Action,testing 3,testing1
 0,0.0,,0,0
 1,0.1,,0,0
@@ -55,3 +56,62 @@
 53,5.3,testing1,0,1
 54,5.4,testing1,0,1
 55,5.5,testing1,0,1
+=======
+,Time,Action,testing 3,testing1
+0,0.0,,0,0
+1,0.1,,0,0
+2,0.2,,0,0
+3,0.3,,0,0
+4,0.4,,0,0
+5,0.5,,0,0
+6,0.6,,0,0
+7,0.7,,0,0
+8,0.8,testing1,0,1
+9,0.9,testing1,0,1
+10,1.0,testing1,0,1
+11,1.1,testing1,0,1
+12,1.2,testing1,0,1
+13,1.3,testing1,0,1
+14,1.4,testing1,0,1
+15,1.5,testing1,0,1
+16,1.6,testing1,0,1
+17,1.7,,0,0
+18,1.8,,0,0
+19,1.9,,0,0
+20,2.0,,0,0
+21,2.1,,0,0
+22,2.2,,0,0
+23,2.3,testing 3,1,0
+24,2.4,testing 3,1,0
+25,2.5,testing 3,1,0
+26,2.6,testing 3,1,0
+27,2.7,testing 3,1,0
+28,2.8,testing 3,1,0
+29,2.9,testing 3,1,0
+30,3.0,testing 3,1,0
+31,3.1,testing 3,1,0
+32,3.2,testing 3,1,0
+33,3.3,testing 3,1,0
+34,3.4,testing 3,1,0
+35,3.5,testing 3,1,0
+36,3.6,testing 3,1,0
+37,3.7,testing 3,1,0
+38,3.8,testing 3,1,0
+39,3.9,testing 3,1,0
+40,4.0,,0,0
+41,4.1,,0,0
+42,4.2,,0,0
+43,4.3,testing1,0,1
+44,4.4,testing1,0,1
+45,4.5,testing1,0,1
+46,4.6,testing1,0,1
+47,4.7,testing1,0,1
+48,4.8,testing1,0,1
+49,4.9,testing1,0,1
+50,5.0,testing1,0,1
+51,5.1,testing1,0,1
+52,5.2,testing1,0,1
+53,5.3,testing1,0,1
+54,5.4,testing1,0,1
+55,5.5,testing1,0,1
+>>>>>>> bf88c2b8051cb65a0f0a8f953dbe1eccef2770ad
