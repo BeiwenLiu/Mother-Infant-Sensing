@@ -288,5 +288,5 @@ def labelAnnotations(tierName,dataframe):
 
 
 #txt file must be in txt/filename.txt
-startParse('testing.txt')
+startParse('P2Post_e20160708_143516_013089.txt')
 #labelAnnotations("csv/Comments.csv")

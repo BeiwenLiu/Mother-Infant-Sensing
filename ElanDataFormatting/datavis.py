@@ -235,6 +235,6 @@ def createDF(action,start,end,duration):
     df['End'] = [end]
     df['Duration'] = [duration]
     return df
-graph2("comment.csv")
+#graph2("*CHF.csv")
 #graph("comment.csv")
-#histogram("P1_e20160630_174419_013088.txt")
+#histogram("P2Post_e20160708_143516_013089.txt")
