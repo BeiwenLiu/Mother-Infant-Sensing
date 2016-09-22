@@ -37,9 +37,70 @@ def graph(filename):
     tempDf = tempDf.set_index([[indexIncrement]])
     tempDf.index.name = "Time"
     
+    
     df = df[uniqueValues]
     df = df.append(tempDf)
-    ax = df[uniqueValues].plot()
+    
+    
+    number = len(df[uniqueValues])
+    
+    indexVal = df.index.values[-1] / 8
+    print indexVal
+    
+    plt.figure(1)
+    for x in range(1,9):
+        plt.subplot(4,2,x)
+        ax = df[uniqueValues][0:indexVal*x].plot(ax=plt.gca(), title="Graph %d" % x, legend=False)
+        ax.set_xlabel("")
+        ax.set_ylim(0,2)
+        ax.set_xlim(indexVal*(x-1),indexVal*x)
+
+        
+    plt.subplots_adjust(hspace=.7)
+    
+    plt.show()
+    
+def graph2(filename):
+    
+    df = pd.read_csv('csv/{}'.format(filename),index_col='Time')
+    
+    uniqueValues = np.unique(df[['Action']])
+    if len(uniqueValues) > 1:
+        uniqueValues = uniqueValues[1:]
+        
+        
+    
+    answer = raw_input("Would you like to select an annotation? (y/n)\n")
+    if answer == 'y':
+        answer = True
+        annotation = raw_input("Please select one or more (separate with commas):\n{}\n".format(uniqueValues))
+        annotationList = annotation.split(",")
+    else: answer = False
+    
+
+    
+    tempDf = pd.DataFrame(columns=[uniqueValues])
+    for element in uniqueValues:
+        tempDf[element] = [0]
+        
+    
+    indicies = df.index.values.tolist()
+    indexIncrement = indicies[-1] + .1
+    index = indicies[-1] + 1
+    
+    tempDf = tempDf.set_index([[indexIncrement]])
+    tempDf.index.name = "Time"
+    
+    df = df[uniqueValues]
+    
+    df = df.append(tempDf)
+    
+    if answer:
+        ax = df[annotationList].plot()
+        ax.legend()
+    else:
+        ax = df[uniqueValues].plot()
+        
     ax.set_ylim(0,2)
     ax.set_xlim(0,index)
     plt.show()
@@ -174,6 +235,6 @@ def createDF(action,start,end,duration):
     df['End'] = [end]
     df['Duration'] = [duration]
     return df
-
-#graph("*CHF.csv")
-histogram("P1_e20160630_174419_013088.txt")
+graph2("comment.csv")
+#graph("comment.csv")
+#histogram("P1_e20160630_174419_013088.txt")
