@@ -49,13 +49,13 @@ def startParse(filename):
         else:
             timeDf = createDFTime(timeOffset,end,increment,unixTime,timeOffset)
             sa = timeDf.merge(sa,on="Time",how="left")
-            labelAnnotations(tier,sa)
+            labelAnnotations(filename,tier,sa)
             #sa.to_csv("csv/{}.csv".format(tier))
             sa = pd.DataFrame(columns=['Time','Action'])
             index = index + 1
     timeDf = createDFTime(timeOffset,end,increment,unixTime,timeOffset)
     sa = timeDf.merge(sa,on="Time",how="left")
-    labelAnnotations(tier,sa)
+    labelAnnotations(filename,tier,sa)
     #sa.to_csv("csv/{}.csv".format(tier))
     
             
@@ -248,7 +248,7 @@ def unix(timeStamp,dateStamp="1970-01-01"):
     return dateUnix+timeUnix+timeUnix2
     
     
-def labelAnnotations(tierName,dataframe):
+def labelAnnotations(filename,tierName,dataframe):
     print tierName
     temp = dataframe
     
@@ -279,14 +279,13 @@ def labelAnnotations(tierName,dataframe):
     
     for x in range(0,len(temp)):
         if action[x] in uniqueValues[:]:
-            print "Changing index: ", x
             sa[action[x]].iloc[x] = 1
             
     if len(uniqueValues) > 1:        
         sa = sa.drop(float('NaN'),axis=1)
-    sa.to_csv('csv/{}.csv'.format(tierName))
+    sa.to_csv('csv/{}{}.csv'.format(filename[:-4],tierName))
 
 
 #txt file must be in txt/filename.txt
-startParse('P2Post_e20160708_143516_013089.txt')
+startParse('P1.txt')
 #labelAnnotations("csv/Comments.csv")

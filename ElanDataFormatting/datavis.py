@@ -19,11 +19,17 @@ def graph(filename):
     df = pd.read_csv('csv/{}'.format(filename),index_col='Time')
     
     uniqueValues = np.unique(df[['Action']])
-    
-    
+
     if len(uniqueValues) > 1:
         uniqueValues = uniqueValues[1:]
+        
     
+    answer = raw_input("Would you like to select an annotation? (y/n)\n")
+    if answer == 'y':
+        answer = True
+        annotation = raw_input("Please select one or more (separate with commas):\n{}\n".format(uniqueValues))
+        annotationList = annotation.split(",")
+    else: answer = False
     
     tempDf = pd.DataFrame(columns=[uniqueValues])
     for element in uniqueValues:
@@ -50,14 +56,18 @@ def graph(filename):
     plt.figure(1)
     for x in range(1,9):
         plt.subplot(4,2,x)
-        ax = df[uniqueValues][0:indexVal*x].plot(ax=plt.gca(), title="Graph %d" % x, legend=False)
+        if answer:
+            ax = df[annotationList][0:indexVal*x].plot(ax=plt.gca(), title="Graph %d" % x, legend=False)
+        else:
+            ax = df[uniqueValues][0:indexVal*x].plot(ax=plt.gca(), title="Graph %d" % x, legend=False)
         ax.set_xlabel("")
         ax.set_ylim(0,2)
         ax.set_xlim(indexVal*(x-1),indexVal*x)
 
         
     plt.subplots_adjust(hspace=.7)
-    
+    plt.suptitle("{} plot".format(filename))
+    plt.legend(loc='upper center', bbox_to_anchor=(0,0))
     plt.show()
     
 def graph2(filename):
@@ -96,13 +106,59 @@ def graph2(filename):
     df = df.append(tempDf)
     
     if answer:
-        ax = df[annotationList].plot()
+        ax = df[annotationList].plot(title="{}".format(filename[:-4]))
+        ax.legend()
+    else:
+        ax = df[uniqueValues].plot(title="{}".format(filename[:-4]))
+        
+    ax.set_ylim(0,2)
+    ax.set_xlim(0,index)
+    plt.show()
+    
+def graph3(filename):
+    
+    df = pd.read_csv('csv/{}'.format(filename),index_col='Time')
+    
+    uniqueValues = np.unique(df[['Action']])
+    if len(uniqueValues) > 1:
+        uniqueValues = uniqueValues[1:]
+        
+        
+    
+    answer = raw_input("Would you like to select an annotation? (y/n)\n")
+    if answer == 'y':
+        answer = True
+        annotation = raw_input("Please select one or more (separate with commas):\n{}\n".format(uniqueValues))
+        annotationList = annotation.split(",")
+    else: answer = False
+    
+
+    
+    tempDf = pd.DataFrame(columns=[uniqueValues])
+    for element in uniqueValues:
+        tempDf[element] = [0]
+        
+    
+    indicies = df.index.values.tolist()
+    indexIncrement = indicies[-1] + .1
+    index = indicies[-1] + 1
+    
+    tempDf = tempDf.set_index([[indexIncrement]])
+    tempDf.index.name = "Time"
+    
+    df = df[uniqueValues]
+    
+    df = df.append(tempDf)
+    
+    if answer:
+        ax = df[annotationList][0:1000].plot()
         ax.legend()
     else:
         ax = df[uniqueValues].plot()
         
     ax.set_ylim(0,2)
-    ax.set_xlim(0,index)
+    ax.set_xlim(0,1000)
+    #ax.title("{}".format(filename))
     plt.show()
     
 def histogram(filename):
@@ -173,7 +229,7 @@ def plotHistogram(sa):
         answer.append(stringToTime(row1[number + 1]) - stringToTime(row2[number]))
         
     sa['Gap'] = answer
-    sa['Gap'].hist(bins = 20, facecolor='g')
+    sa['Gap'].hist(bins = 80, facecolor='g')
     
     plt.xlabel('Time in Seconds')
     plt.ylabel('Occurences')
@@ -235,6 +291,8 @@ def createDF(action,start,end,duration):
     df['End'] = [end]
     df['Duration'] = [duration]
     return df
-#graph2("*CHF.csv")
-#graph("comment.csv")
-#histogram("P2Post_e20160708_143516_013089.txt")
+    
+graph3("P1*CHN.csv")
+#graph2("P1*CHN.csv")
+#graph("P1*CHF.csv")
+#histogram("P1.txt")
