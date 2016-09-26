@@ -3,6 +3,8 @@
 Created on Sun Sep 11 16:06:45 2016
 
 @author: user
+@description:
+
 """
 import numpy as np
 import pandas as pd
@@ -12,11 +14,14 @@ from time import mktime
 import time
 import calendar
 import matplotlib.pyplot as plt
+import os
 
-def startParse(filename):
+#File must be in txt/yourfile.txt
 
-    
-    
+FILE_NAME = 'testing.txt'
+
+def startParse():
+    filename = FILE_NAME
     timeOffset = findBeginning(filename)
     timeOffset,date,time = userInput(timeOffset)
                
@@ -283,9 +288,10 @@ def labelAnnotations(filename,tierName,dataframe):
             
     if len(uniqueValues) > 1:        
         sa = sa.drop(float('NaN'),axis=1)
-    sa.to_csv('csv/{}{}.csv'.format(filename[:-4],tierName))
+    
+    directory = 'csv/{}'.format(FILE_NAME[:-4])
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    sa.to_csv('csv/{}/{}{}.csv'.format(FILE_NAME[:-4],filename[:-4],tierName))
 
-
-#txt file must be in txt/filename.txt
-startParse('P1.txt')
-#labelAnnotations("csv/Comments.csv")
+startParse()

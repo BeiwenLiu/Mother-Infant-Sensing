@@ -13,8 +13,12 @@ from time import mktime
 import time
 import matplotlib.pyplot as plt
 import collections
+import os
 
-def histogram(filename):
+FILE_NAME = 'P1.txt'
+
+def histogram():
+    filename = FILE_NAME
     s = open('txt/{}'.format(filename), 'r')
     x = s.readline().split("\t")
     sa = pd.DataFrame(columns=['Action','Start','End','Duration'])
@@ -71,7 +75,7 @@ def labelAnnotations(tierName,dataframe):
     for s in sel:
         episode = makeEpisode(sa, s)
         episodeArray.append(episode)
-    createCSV(episodeArray, end, sel)
+    createCSV(episodeArray, end, sel, annotation)
         
         
 def makeEpisode(sa, s):
@@ -100,7 +104,7 @@ def makeEpisode(sa, s):
     return episode
    
    
-def createCSV(episode, end, sel):
+def createCSV(episode, end, sel, annotation):
     df = pd.DataFrame(columns=['Time'])
     newRange = np.arange(0,roundTime(stringToTimeOrig(end)), .1)
     
@@ -124,8 +128,11 @@ def createCSV(episode, end, sel):
         df2['{} Minute Episode'.format(sel[counter])] = counter + 2
         counter = counter + 1
         df = df.merge(df2,on="Time", how="left")
-        
-    df.to_csv("csv/testing.csv")
+     
+    directory = 'csv/{}'.format(FILE_NAME[:-4])
+    if not os.path.exists(directory):
+        os.makedirs(directory) 
+    df.to_csv("csv/{}/{}{}histogram.csv".format(FILE_NAME[:-4],FILE_NAME[:-4],annotation))
     
     
 #Use this when converting directly
@@ -177,6 +184,12 @@ def findTiers(filename):
     
     s.close()
     return a
-
+def createDF(action,start,end,duration):
+    df = pd.DataFrame(columns=['Action','Start','End'])
+    df['Action'] = [action]
+    df['Start'] = [start]
+    df['End'] = [end]
+    df['Duration'] = [duration]
+    return df
     
-histogram("P1.txt")
+histogram()

@@ -296,12 +296,13 @@ def createDF(action,start,end,duration):
     
 def graphEpisode(filename):
     df = pd.read_csv('csv/{}'.format(filename),index_col='Time')
-    
-    df[['1 Minute Episode','2 Minute Episode','5 Minute Episode', '10 Minute Episode', '20 Minute Episode', '50 Minute Episode', '100 Minute Episode']].plot()
+    dflist = list(df.columns.values)
+    print dflist
+    df[dflist[1:]].plot()
     plt.show()
     
 #graph3("P1*CHN.csv")
 #graph2("P1*CHN.csv")
-graphEpisode("testing.csv")
+graphEpisode("P1&=crying histogram.csv")
 #graph("P1*CHF.csv")
 #histogram("P1.txt")
