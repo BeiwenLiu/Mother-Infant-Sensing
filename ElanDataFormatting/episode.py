@@ -48,6 +48,8 @@ def labelAnnotations(tierName,dataframe):
     temp = dataframe
     uniqueValues = np.unique(temp[['Action']])
     
+    end = temp['End'].iloc[-1]
+    
     annotation = raw_input("Select an annotation: {}\n".format(uniqueValues))
     
     counter = 0
@@ -63,13 +65,21 @@ def labelAnnotations(tierName,dataframe):
     
     sa = pd.concat([sa,temp],ignore_index=True)
     
-    plotHistogram(sa)
-    
+    sel = raw_input("Select one or multiple episodes - (1,2,5,10,20) minutes\n")
+    sel = sel.split(",")
+    episodeArray = []
+    for s in sel:
+        episode = makeEpisode(sa, s)
+        episodeArray.append(episode)
+    createCSV(episodeArray, end, sel)
         
         
-def plotHistogram(sa):
+def makeEpisode(sa, s):
+    input1 = float(s) * float(60)
+    print input1
     row1 = sa['Start']
     row2 = sa['End']
+    sa.to_csv("something.csv")
     found = False
     keyHolder = ''
     answer = []
@@ -77,7 +87,7 @@ def plotHistogram(sa):
     episode = collections.OrderedDict()
     for number in range(len(row1) - 1):
         temp = stringToTime(row1[number + 1]) - stringToTime(row2[number])
-        if temp < 60:
+        if float(temp) < input1:
             if found:
                 episode[keyHolder] = str(row2[number + 1])
             else:
@@ -87,12 +97,49 @@ def plotHistogram(sa):
         else:
             found = False
     print episode
+    return episode
+   
+   
+def createCSV(episode, end, sel):
+    df = pd.DataFrame(columns=['Time'])
+    newRange = np.arange(0,roundTime(stringToTimeOrig(end)), .1)
     
+    for num in range(len(newRange)):
+        newRange[num] = str(newRange[num])
+    df['Time'] = newRange
+    
+    counter = 0
+    for episodeElement in episode:
+        df2 = pd.DataFrame(columns=['Time','{} Minute Episode'.format(sel[counter])])
+        allRange = np.array([0])
+        for element in episodeElement:
+            tempRange = np.arange(roundTime(stringToTimeOrig(element)),roundTime(stringToTimeOrig(episodeElement[element])),.1)
+            allRange = np.concatenate((allRange, tempRange))
+    
+        for num2 in range(len(allRange)):
+            allRange[num2] = str(allRange[num2])
+            
+        
+        df2['Time'] = allRange[1:]
+        df2['{} Minute Episode'.format(sel[counter])] = counter + 2
+        counter = counter + 1
+        df = df.merge(df2,on="Time", how="left")
+        
+    df.to_csv("csv/testing.csv")
+    
+    
+#Use this when converting directly
 def stringToTime(arg):
     offset2 = float(arg[-4:])
     x = time.strptime(arg.split('.')[0],'%H:%M:%S')
     total = datetime.timedelta(hours=x.tm_hour,minutes=x.tm_min,seconds=x.tm_sec).total_seconds()
     return offset2+total
+    
+#For roundTime since decimal places are already removed
+def stringToTime2(arg):
+    x = time.strptime(arg.split('.')[0],'%H:%M:%S')
+    total = datetime.timedelta(hours=x.tm_hour,minutes=x.tm_min,seconds=x.tm_sec).total_seconds()
+    return total
 
 def roundTime(time):
     x = timedelta(microseconds = 100000)
@@ -100,9 +147,13 @@ def roundTime(time):
     if (ans >= 5):
         time = time + x
     time = stringConverter(time)
-    time = stringToTime(time)
+    time = stringToTime2(time)
     
     return time
+
+#Give input of String "00:00:00.00" and it will return type datetime
+def stringToTimeOrig(arg):
+    return datetime.datetime.strptime(arg, '%H:%M:%S.%f')
     
 def stringConverter(datet):
     ans = datet.strftime('%H:%M:%S.%f')[:-5]
@@ -126,19 +177,6 @@ def findTiers(filename):
     
     s.close()
     return a
-    
-def createDF(action,start,end,duration):
-    df = pd.DataFrame(columns=['Action','Start','End'])
-    df['Action'] = [action]
-    df['Start'] = [start]
-    df['End'] = [end]
-    df['Duration'] = [duration]
-    return df
-    
-def p():
-    episode = collections.OrderedDict()
-    episode['hey']=1
-    episode['bye']=2
-    print episode.values()
+
     
 histogram("P1.txt")
