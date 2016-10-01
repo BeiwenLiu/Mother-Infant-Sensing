@@ -13,7 +13,28 @@ from time import mktime
 import time
 import matplotlib.pyplot as plt
 
-def graph(filename):
+#Indicate Tier Here
+FILE_NAME = "/p2post/p2post*CHN.csv"
+
+#Indicate Episode here
+FILE_EPISODE = "/p2post/p2post&=crying episode.csv"
+
+#Indicate Text file here for histogram
+FILE_HISTOGRAM = "p2post.txt"
+
+def start():
+    filen = raw_input("Which file would you like to graph?\n1) Section Graph\n2) Regular Graph\n3) Zoomed in Graph\n4) Histogram\n")
+    yesEpisode = raw_input("Would you like to include an episode?(y/n)\n")    
+    if filen == '1':
+        graph(FILE_NAME,yesEpisode)
+    elif filen == '2':
+        graph2(FILE_NAME,yesEpisode)
+    elif filen == '3':
+        graph3(FILE_NAME,yesEpisode)
+    elif filen == '4':
+        histogram(FILE_HISTOGRAM)
+        
+def graph(filename,yesEpisode):
     
     
     df = pd.read_csv('csv/{}'.format(filename),index_col='Time')
@@ -70,7 +91,7 @@ def graph(filename):
     plt.legend(loc='upper center', bbox_to_anchor=(0,0))
     plt.show()
     
-def graph2(filename):
+def graph2(filename,yesEpisode):
     
     df = pd.read_csv('csv/{}'.format(filename),index_col='Time')
     
@@ -105,19 +126,35 @@ def graph2(filename):
     
     df = df.append(tempDf)
     
-    answer2 = raw_input("Would you like to display episode? (y/n)\n")
+    if yesEpisode == 'y':
+        newDf = pd.read_csv('csv/{}'.format(FILE_EPISODE), index_col="Time")
+        newDfColumns = list(newDf.columns.values)
+        if newDfColumns[0] == 'Unnamed: 0':
+            newDfColumns = newDfColumns[1:]
+            
+        df = pd.merge(df, newDf[newDfColumns], left_index=True, right_index=True, how="left")
+                
     
+    df.to_csv("aaaa.csv")
+    yindex = 2
     if answer:
+        if yesEpisode == 'y':
+            yindex = len(newDfColumns) + 4
+            annotationList = annotationList + newDfColumns
         ax = df[annotationList].plot(title="{}".format(filename[:-4]))
-        ax.legend()
     else:
+        if yesEpisode == 'y':
+            yindex = len(newDfColumns) + 4
+            uniqueValues = uniqueValues + newDfColumns
         ax = df[uniqueValues].plot(title="{}".format(filename[:-4]))
+    
         
-    ax.set_ylim(0,2)
+    ax.set_ylim(0,yindex)
     ax.set_xlim(0,index)
+    plt.legend(loc='upper center', mode="expand")
     plt.show()
     
-def graph3(filename):
+def graph3(filename,yesEpisode):
     
     df = pd.read_csv('csv/{}'.format(filename),index_col='Time')
     
@@ -217,12 +254,12 @@ def labelAnnotations(tierName,dataframe):
     
     calculateTotal(sa)
     
-    plotHistogram(sa)
+    plotHistogram(tierName, sa)
     
     plt.show()
         
         
-def plotHistogram(sa):
+def plotHistogram(tierName, sa):
     row1 = sa['Start']
     row2 = sa['End']
     answer = []
@@ -235,7 +272,7 @@ def plotHistogram(sa):
     
     plt.xlabel('Time in Seconds')
     plt.ylabel('Occurences')
-    plt.title('Histogram of gaps between occurences')
+    plt.title('Histogram of gaps between occurences for {} in {}'.format(tierName, FILE_HISTOGRAM[:-4]))
     plt.show()
     
 def calculateTotal(sa):
@@ -303,6 +340,7 @@ def graphEpisode(filename):
     
 #graph3("P1*CHN.csv")
 #graph2("P1*CHN.csv")
-graphEpisode("P1&=crying histogram.csv")
+#graphEpisode("P1&=crying histogram.csv")
 #graph("P1*CHF.csv")
 #histogram("P1.txt")
+start()

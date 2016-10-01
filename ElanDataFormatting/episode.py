@@ -3,6 +3,7 @@
 Created on Sun Sep 25 03:09:01 2016
 
 @author: Beiwen Liu
+@description: Given original data file.txt, will create an episode file with given time gaps.
 """
 
 import numpy as np
@@ -15,7 +16,8 @@ import matplotlib.pyplot as plt
 import collections
 import os
 
-FILE_NAME = 'P1.txt'
+#creates the episodes given a text file associated with tier
+FILE_NAME = 'p2post.txt'
 
 def histogram():
     filename = FILE_NAME
@@ -69,13 +71,24 @@ def labelAnnotations(tierName,dataframe):
     
     sa = pd.concat([sa,temp],ignore_index=True)
     
+    sa.to_csv("aaasfasf.csv")
     sel = raw_input("Select one or multiple episodes - (1,2,5,10,20) minutes\n")
     sel = sel.split(",")
     episodeArray = []
     for s in sel:
         episode = makeEpisode(sa, s)
         episodeArray.append(episode)
-    createCSV(episodeArray, end, sel, annotation)
+        
+    createcsv = raw_input("Would you like to export to csv or create density?\n1) CSV\n2) density\n3) both\n")
+    if createcsv == '1':
+        createCSV(episodeArray, end, sel, annotation)
+    elif createcsv == '2':
+        densityann = raw_input("Please select an annotation: {}\n".format(uniqueValues))
+        density(episodeArray, densityann, sel)
+    elif createcsv =='3':
+        densityann = raw_input("Please select an annotation: {}\n".format(uniqueValues))
+        createCSV(episodeArray, end, sel, annotation)
+        density(episodeArray, densityann, sel)
         
         
 def makeEpisode(sa, s):
@@ -117,12 +130,13 @@ def createCSV(episode, end, sel, annotation):
         df2 = pd.DataFrame(columns=['Time','{} Minute Episode'.format(sel[counter])])
         allRange = np.array([0])
         for element in episodeElement:
-            tempRange = np.arange(roundTime(stringToTimeOrig(element)),roundTime(stringToTimeOrig(episodeElement[element])),.1)
+            tempRange = np.arange(roundTime(stringToTimeOrig(element[:-1])),roundTime(stringToTimeOrig(episodeElement[element][:-1])),.1)
             allRange = np.concatenate((allRange, tempRange))
     
         for num2 in range(len(allRange)):
-            allRange[num2] = str(allRange[num2])
-            
+            sp = str(round(allRange[num2],1))
+            allRange[num2] = sp
+        
         
         df2['Time'] = allRange[1:]
         df2['{} Minute Episode'.format(sel[counter])] = counter + 2
@@ -132,7 +146,18 @@ def createCSV(episode, end, sel, annotation):
     directory = 'csv/{}'.format(FILE_NAME[:-4])
     if not os.path.exists(directory):
         os.makedirs(directory) 
-    df.to_csv("csv/{}/{}{}histogram.csv".format(FILE_NAME[:-4],FILE_NAME[:-4],annotation))
+    df.to_csv("csv/{}/{}{}episode.csv".format(FILE_NAME[:-4],FILE_NAME[:-4],annotation))
+    
+
+def density(episode, annotation, sel):
+    sel.append('total duration')
+    sel.append('density')
+    df = pd.DataFrame(columns=sel)
+    print df
+    for minepisode in episode:
+        for key in minepisode:
+            print 'start' + key
+            print 'end' + minepisode[key]
     
     
 #Use this when converting directly
@@ -153,6 +178,7 @@ def roundTime(time):
     ans = int(time.strftime('%f')[-5])
     if (ans >= 5):
         time = time + x
+        
     time = stringConverter(time)
     time = stringToTime2(time)
     

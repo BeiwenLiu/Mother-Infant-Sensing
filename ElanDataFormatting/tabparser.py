@@ -3,7 +3,7 @@
 Created on Sun Sep 11 16:06:45 2016
 
 @author: user
-@description:
+@description:Creates a timeseries representation of each occurrence of annotation within a tier
 
 """
 import numpy as np
@@ -17,8 +17,8 @@ import matplotlib.pyplot as plt
 import os
 
 #File must be in txt/yourfile.txt
-
-FILE_NAME = 'testing.txt'
+#Once run, will create folder with File name with all tiers within
+FILE_NAME = 'p2post.txt'
 
 def startParse():
     filename = FILE_NAME
@@ -285,6 +285,7 @@ def labelAnnotations(filename,tierName,dataframe):
     for x in range(0,len(temp)):
         if action[x] in uniqueValues[:]:
             sa[action[x]].iloc[x] = 1
+            print x
             
     if len(uniqueValues) > 1:        
         sa = sa.drop(float('NaN'),axis=1)
