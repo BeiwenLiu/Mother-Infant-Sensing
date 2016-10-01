@@ -19,6 +19,9 @@ import os
 #creates the episodes given a text file associated with tier
 FILE_NAME = 'p2post.txt'
 
+#This file will be automatically populated with the corresponding tier to create density for an annotation
+FILE_DENSITY =''
+
 def histogram():
     filename = FILE_NAME
     s = open('txt/{}'.format(filename), 'r')
@@ -27,6 +30,8 @@ def histogram():
     
     
     tier = raw_input("Select a tier: {}\n".format(findTiers(filename)))
+    global FILE_DENSITY
+    FILE_DENSITY = '{}{}.csv'.format(FILE_NAME[:-4],tier)
     count = 0
     keepGoing = False
     while len(x) != 1:
@@ -153,11 +158,60 @@ def density(episode, annotation, sel):
     sel.append('total duration')
     sel.append('density')
     df = pd.DataFrame(columns=sel)
+    counter = 0
     print df
+    print FILE_DENSITY
+    totalindexvalues = returnPandasIndex()
+    tempDf = getDataFrame(annotation)
     for minepisode in episode:
+        timeRange = []
+        duration = []
+        density = []
         for key in minepisode:
-            print 'start' + key
-            print 'end' + minepisode[key]
+            start = key
+            end = minepisode[key]
+            timeRange.append(str(start) + '-' + str(end))
+            totalduration = str(stringToTime(end) - stringToTime(start))
+            start,end = defineTime(start,end)
+            start = np.where(totalindexvalues == start)[0][0]
+            end = np.where(totalindexvalues == end)[0][0]
+            dura = findDuration(tempDf,start,end, annotation)
+            duration.append(dura)
+            density.append(dura/float(totalduration))
+        
+        print timeRange, duration, density
+        df[sel[counter]] = timeRange
+        df['total duration'] = duration
+        df['density'] = density
+        counter = counter + 1
+        
+    #Export to csv
+    print df
+    
+def findDuration(dataframe, start, end, annotation):
+    listtemp = dataframe.ix[start:end, annotation]
+    total = 0
+    for element in listtemp:
+        if element == 1:
+            total = total + 1
+            
+    number = total * .1
+    return number
+    
+    
+def getDataFrame(annotation):
+    return pd.read_csv('csv/{}/{}'.format(FILE_NAME[:-4],FILE_DENSITY), usecols=[annotation])
+    
+def returnPandasIndex():
+    df = pd.read_csv('csv/{}/{}'.format(FILE_NAME[:-4],FILE_DENSITY), index_col='Time')
+    
+    return df.index.values
+    
+def defineTime(start,end):
+    start = roundTime(stringToTimeOrig(start))
+    end = roundTime(stringToTimeOrig(end))
+    return start,end
+    
     
     
 #Use this when converting directly
