@@ -18,7 +18,7 @@ import os
 
 #File must be in txt/yourfile.txt
 #Once run, will create folder with File name with all tiers within
-FILE_NAME = 'p2post.txt'
+FILE_NAME = 'p2_pre _e20160630_175407_013089.txt'
 
 def startParse():
     filename = FILE_NAME
@@ -37,11 +37,12 @@ def startParse():
     sa = pd.DataFrame(columns=['Time','Action'])
     #uniqueColumns = findAnnotations(filename,tier)
     
-    
     count = 0
     while len(x) != 1:
+        print index
         tier = tiers[index]
         count = count + 1
+        print x, len(x)
             
         if tier == x[0] and len(x) == 9:
             action = x[-1][:-1]
@@ -256,7 +257,6 @@ def unix(timeStamp,dateStamp="1970-01-01"):
 def labelAnnotations(filename,tierName,dataframe):
     print tierName
     temp = dataframe
-    
     uniqueValues = np.unique(temp[['Action']])
     
     counter = 0
@@ -287,6 +287,7 @@ def labelAnnotations(filename,tierName,dataframe):
             sa[action[x]].iloc[x] = 1
             print x
             
+    
     if len(uniqueValues) > 1:        
         sa = sa.drop(float('NaN'),axis=1)
     

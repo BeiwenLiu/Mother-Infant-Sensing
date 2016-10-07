@@ -17,7 +17,7 @@ import collections
 import os
 
 #creates the episodes given a text file associated with tier
-FILE_NAME = 'p2post.txt'
+FILE_NAME = 'p2_pre _e20160630_175407_013089.txt'
 
 #This file will be automatically populated with the corresponding tier to create density for an annotation
 FILE_DENSITY =''

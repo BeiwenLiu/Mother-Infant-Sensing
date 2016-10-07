@@ -6,7 +6,9 @@ Created on Fri Sep 30 19:36:03 2016
 @description: Creates separate files for each tier
 """
 
-FILE_NAME = "UCL_ CHN output _Beiwen2.txt"
+#File must be in multipleTiers directory
+
+FILE_NAME = "UCL_ CHN output _Beiwen3.txt"
 
 def parse(filename = FILE_NAME):
     s = open('multipletiers/{}'.format(filename), 'r')
@@ -31,6 +33,11 @@ def parse(filename = FILE_NAME):
             filewrite = open('txt/{}.txt'.format(z1), 'w')
             
         x = x.replace('{}'.format(z), "").rstrip()
+        
+        re = x.split('\t')
+        if len(re) == 8:
+            x = x+"\t"
+        
         filewrite.write('{}\n'.format(x))
         counter2 = counter2 + 1
         x = s.readline()
