@@ -14,10 +14,10 @@ import time
 import matplotlib.pyplot as plt
 
 #Indicate Tier Here
-FILE_NAME = "/p2post/p2post*CHN.csv"
+FILE_NAME = "/p2_pre _e20160630_175407_013089/p2_pre _e20160630_175407_013089*CHN.csv"
 
 #Indicate Episode here
-FILE_EPISODE = "/p2post/p2post&=crying episode.csv"
+FILE_EPISODE = "/p2_pre _e20160630_175407_013089/p2_pre _e20160630_175407_013089&=cryingepisode.csv"
 
 #Indicate Text file here for histogram
 FILE_HISTOGRAM = "p2post.txt"

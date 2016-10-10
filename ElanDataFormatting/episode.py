@@ -17,10 +17,8 @@ import collections
 import os
 
 #creates the episodes given a text file associated with tier
-FILE_NAME = 'p2_pre _e20160630_175407_013089.txt'
+FILE_NAME = 'p6 post _ e20160830_153103_013089.txt'
 
-#This file will be automatically populated with the corresponding tier to create density for an annotation
-FILE_DENSITY =''
 
 def histogram():
     filename = FILE_NAME
@@ -37,7 +35,7 @@ def histogram():
     while len(x) != 1:
         
         count = count + 1
-            
+       
         if tier == x[0] and len(x) == 9:
             action = x[-1][:-1]
             start = x[2][-12:]
@@ -48,11 +46,16 @@ def histogram():
             sa = pd.concat([sa,tempDf],ignore_index=True)
             keepGoing = True
         else:
+            print x
             if keepGoing:
                 labelAnnotations(tier,sa)
                 keepGoing = False
             
         x = s.readline().split("\t")
+        
+    if keepGoing:
+        labelAnnotations(tier,sa)
+        keepGoing = False
   
     
 def labelAnnotations(tierName,dataframe):
@@ -84,7 +87,7 @@ def labelAnnotations(tierName,dataframe):
         episode = makeEpisode(sa, s)
         episodeArray.append(episode)
         
-    createcsv = raw_input("Would you like to export to csv or create density?\n1) CSV\n2) density\n3) both\n")
+    createcsv = raw_input("Would you like to export to csv or create density?\n1) TimeSeries CSV\n2) density\n3) both\n4) Episode CSV\n")
     if createcsv == '1':
         createCSV(episodeArray, end, sel, annotation)
     elif createcsv == '2':
@@ -94,8 +97,29 @@ def labelAnnotations(tierName,dataframe):
         densityann = raw_input("Please select an annotation: {}\n".format(uniqueValues))
         createCSV(episodeArray, end, sel, annotation)
         density(episodeArray, densityann, sel)
+    elif createcsv == '4':
+        exportEpisodeToCSV(episodeArray, sel)
         
         
+        
+def exportEpisodeToCSV(episode, sel):
+    print sel[0]
+    df = pd.DataFrame(columns=['Begin Time','End Time'])
+    beginTime = []
+    endTime = []
+    for e in episode:
+        for ef in e:
+            beginTime.append(str(ef))
+            endTime.append(str(e[ef]))
+            
+    df['Begin Time'] = beginTime
+    df['End Time'] = endTime
+    df['Annotation'] = '{} Minute Episode'.format(sel[0])
+    
+    df.to_csv("testing.csv")
+        
+    
+            
 def makeEpisode(sa, s):
     input1 = float(s) * float(60)
     print input1
@@ -118,7 +142,6 @@ def makeEpisode(sa, s):
                 found = True
         else:
             found = False
-    print episode
     return episode
    
    
@@ -155,38 +178,41 @@ def createCSV(episode, end, sel, annotation):
     
 
 def density(episode, annotation, sel):
-    sel.append('total duration')
-    sel.append('density')
-    df = pd.DataFrame(columns=sel)
-    counter = 0
-    print df
-    print FILE_DENSITY
+    columnNames = []
+    columnNames.append('Category')
+    columnNames.append('Begin Time')
+    columnNames.append('End Time')
+    columnNames.append('{} duration'.format(annotation))
+    columnNames.append('{} density'.format(annotation))
+    df = pd.DataFrame(columns=columnNames)
+    fileDest = FILE_NAME[:-4]
     totalindexvalues = returnPandasIndex()
     tempDf = getDataFrame(annotation)
     for minepisode in episode:
-        timeRange = []
+        beginTime = []
+        endTime = []
         duration = []
         density = []
         for key in minepisode:
             start = key
             end = minepisode[key]
-            timeRange.append(str(start) + '-' + str(end))
+            beginTime.append(str(start))
+            endTime.append(str(end))
             totalduration = str(stringToTime(end) - stringToTime(start))
             start,end = defineTime(start,end)
             start = np.where(totalindexvalues == start)[0][0]
             end = np.where(totalindexvalues == end)[0][0]
             dura = findDuration(tempDf,start,end, annotation)
             duration.append(dura)
-            density.append(dura/float(totalduration))
+            density.append("{0:.2f}".format(dura/float(totalduration)))
         
-        print timeRange, duration, density
-        df[sel[counter]] = timeRange
-        df['total duration'] = duration
-        df['density'] = density
-        counter = counter + 1
+        #print timeRange, duration, density
+        df['Begin Time'] = beginTime
+        df['End Time'] = endTime
+        df['{} duration'.format(annotation)] = duration
+        df['{} density'.format(annotation)] = density
         
-    #Export to csv
-    print df
+    df.to_csv("csv/{}/{}_{}_Min_Density.csv".format(fileDest,fileDest,sel[0]))
     
 def findDuration(dataframe, start, end, annotation):
     listtemp = dataframe.ix[start:end, annotation]

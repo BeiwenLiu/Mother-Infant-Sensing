@@ -18,7 +18,7 @@ import os
 
 #File must be in txt/yourfile.txt
 #Once run, will create folder with File name with all tiers within
-FILE_NAME = 'p2_pre _e20160630_175407_013089.txt'
+FILE_NAME = 'p6 pre_ e20160718_142108_013089.txt'
 
 def startParse():
     filename = FILE_NAME
