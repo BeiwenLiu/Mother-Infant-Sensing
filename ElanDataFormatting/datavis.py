@@ -20,7 +20,7 @@ FILE_NAME = "/p2_pre _e20160630_175407_013089/p2_pre _e20160630_175407_013089*CH
 FILE_EPISODE = "/P1_e20160630_174419_013088/P1_e20160630_174419_013088&=cryingepisode.csv"
 
 #Indicate Text file here for histogram
-FILE_HISTOGRAM = "P1_e20160630_174419_013088.txt"
+FILE_HISTOGRAM = "p6 pre_ e20160718_142108_013089.txt"
 
 def start():
     filen = raw_input("Which file would you like to graph?\n1) Section Graph\n2) Regular Graph\n3) Zoomed in Graph\n4) Histogram\n")
@@ -290,16 +290,32 @@ def plotHistogram(tierName, sa):
     row2 = sa['End']
     answer = []
     answer.append(0)
+    baseLog = 2
+    times = 0
     for number in range(len(row1) - 1):
         answer.append(stringToTime(row1[number + 1]) - stringToTime(row2[number]))
         
+    
     sa['Gap'] = answer
+    sa['Gap'] = sa['Gap']/60
     print sa['Gap']
+    maxSA = sa['Gap'].max()
+    minSA = sa['Gap'].min()
+    
+    tempMax = 0
+    while tempMax < maxSA:
+        times = times + 1
+        tempMax = baseLog**times
+    print tempMax
+    print maxSA
+    print times
+    
+    binBoundaries = np.logspace(0, times, 50,base=baseLog)
     sa['Gap'].to_csv("sdfsdf.csv")
-    ax = sa['Gap'].hist(bins=[0,1,10,60,60*60, 24*60*60], facecolor='g')
-    ax.set_xticklabels(['1 s','1 s'], rotation='horizontal')
-    plt.xlabel('Time in Seconds')
+    ax = sa['Gap'].hist(bins=binBoundaries, facecolor='g')
+    plt.xlabel('Time in Minutes')
     plt.ylabel('Occurences')
+    plt.xlim(minSA,maxSA)
     plt.title('Histogram of gaps between occurences for {} in {}'.format(tierName, FILE_HISTOGRAM[:-4]))
     plt.show()
     
