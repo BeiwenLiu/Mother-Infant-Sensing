@@ -17,10 +17,10 @@ import matplotlib.pyplot as plt
 FILE_NAME = "/p2_pre _e20160630_175407_013089/p2_pre _e20160630_175407_013089*CHN.csv"
 
 #Indicate Episode here
-FILE_EPISODE = "/p2_pre _e20160630_175407_013089/p2_pre _e20160630_175407_013089&=cryingepisode.csv"
+FILE_EPISODE = "/P1_e20160630_174419_013088/P1_e20160630_174419_013088&=cryingepisode.csv"
 
 #Indicate Text file here for histogram
-FILE_HISTOGRAM = "p2post.txt"
+FILE_HISTOGRAM = "P1_e20160630_174419_013088.txt"
 
 def start():
     filen = raw_input("Which file would you like to graph?\n1) Section Graph\n2) Regular Graph\n3) Zoomed in Graph\n4) Histogram\n")
@@ -214,10 +214,12 @@ def histogram(filename):
         count = count + 1
             
         if tier == x[0] and len(x) == 9:
+            
             action = x[-1][:-1]
             start = x[2][-12:]
             end = x[4][-12:]
-            duration = x[6][-12:]
+            duration = stringToTime(x[6][-12:])
+            print start
             
             tempDf = createDF(action,start,end,duration)
             sa = pd.concat([sa,tempDf],ignore_index=True)
@@ -228,6 +230,9 @@ def histogram(filename):
                 keepGoing = False
             
         x = s.readline().split("\t")
+    if keepGoing:
+            labelAnnotations(tier,sa)
+            keepGoing = False
     #timeDf = createDFTime(timeOffset,end,increment,unixTime,timeOffset)
     #sa = timeDf.merge(sa,on="Time",how="left")
   
@@ -243,20 +248,41 @@ def labelAnnotations(tierName,dataframe):
     
     temp = temp.loc[temp['Action'] == annotation]
     
+    print temp
+    
     sa = pd.DataFrame(columns=['Action','Start','End','Duration'])
     sa['Action'] = [annotation]
     sa['Start'] = ["00:00:00.000"]
     sa['End'] = ["00:00:00.000"]
-    sa['Duration'] = ["00:00:00.000"]
+    sa['Duration'] = [stringToTime("00:00:00.000")]
     
     sa = pd.concat([sa,temp],ignore_index=True)
-    
     
     calculateTotal(sa)
     
     plotHistogram(tierName, sa)
     
     plt.show()
+    
+def plotHistogramWithNumpy(tierName, sa):
+    # Create non-uniform bins.  Unit in seconds.
+    bins = np.array([0, 1, 10, 60, 60*10, 60*60, 24*60*60])
+    print 'hisogram bins:', bins
+    
+    # Get histogram of random data
+    y, x = np.histogram(sa, bins=bins)
+    
+    # Correct bin placement
+    x = x[1:]
+    
+    # Turn into pandas Series
+    hist = pd.Series(y, x)
+    
+    # Plot
+    ax = hist.plot(kind='bar', width=1, alpha=0.5, align='center')
+    ax.set_title('Non-Uniform Bin Histogram')
+    ax.set_xlabel('Time Length')
+    ax.set_xticklabels(['1 s', '10 s', '1 Min', '1 Hr', '1 Day', '>1 Day'], rotation='horizontal')
         
         
 def plotHistogram(tierName, sa):
@@ -268,8 +294,10 @@ def plotHistogram(tierName, sa):
         answer.append(stringToTime(row1[number + 1]) - stringToTime(row2[number]))
         
     sa['Gap'] = answer
-    sa['Gap'].hist(bins = 80, facecolor='g')
-    
+    print sa['Gap']
+    sa['Gap'].to_csv("sdfsdf.csv")
+    ax = sa['Gap'].hist(bins=[0,1,10,60,60*60, 24*60*60], facecolor='g')
+    ax.set_xticklabels(['1 s','1 s'], rotation='horizontal')
     plt.xlabel('Time in Seconds')
     plt.ylabel('Occurences')
     plt.title('Histogram of gaps between occurences for {} in {}'.format(tierName, FILE_HISTOGRAM[:-4]))
@@ -280,7 +308,7 @@ def calculateTotal(sa):
     total = 0
     
     for number in range(len(row3)):
-        total = total + stringToTime(row3[number])
+        total = total + row3[number]
         
     print total
     

@@ -17,9 +17,16 @@ import collections
 import os
 
 #creates the episodes given a text file associated with tier
-FILE_NAME = 'p6 post _ e20160830_153103_013089.txt'
+FILE_NAME = 'P1_e20160630_174419_013088.txt'
 
+#P1_e20160630_174419_013088.txt'
 
+#,'p2_pre _e20160630_175407_013089.txt','P2Post_e20160708_143516_013089.txt',
+ #             'p3 post _ e20160710_123024_013089.txt','p3 pre_e20160705_171307_013088.txt','p4 post_ e20160710_123200_013088.txt',
+  #            'p5 post_ e20160830_152743_013088.txt','P5 pre _ e20160718_141513_013088.txt','p6 post _ e20160830_153103_013089.txt',
+  #           'p6 pre_ e20160718_142108_013089.txt']
+              
+        
 def histogram():
     filename = FILE_NAME
     s = open('txt/{}'.format(filename), 'r')

@@ -18,7 +18,7 @@ import os
 
 #File must be in txt/yourfile.txt
 #Once run, will create folder with File name with all tiers within
-FILE_NAME = 'p6 pre_ e20160718_142108_013089.txt'
+FILE_NAME = 'P1_e20160630_174419_013088.txt'
 
 def startParse():
     filename = FILE_NAME
@@ -292,8 +292,10 @@ def labelAnnotations(filename,tierName,dataframe):
         sa = sa.drop(float('NaN'),axis=1)
     
     directory = 'csv/{}'.format(FILE_NAME[:-4])
+    tierName = tierName.split("/")
     if not os.path.exists(directory):
         os.makedirs(directory)
-    sa.to_csv('csv/{}/{}{}.csv'.format(FILE_NAME[:-4],filename[:-4],tierName))
+    #sa.drop('Action', axis=1, inplace=True)
+    sa.to_csv('csv/{}/{}{}.csv'.format(FILE_NAME[:-4],filename[:-4],tierName[0]))
 
 startParse()
