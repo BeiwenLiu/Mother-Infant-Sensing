@@ -3,6 +3,8 @@
 Created on Sun Sep 11 16:06:45 2016
 
 @author: user
+@description:Creates a timeseries representation of each occurrence of annotation within a tier
+
 """
 import numpy as np
 import pandas as pd
@@ -12,11 +14,14 @@ from time import mktime
 import time
 import calendar
 import matplotlib.pyplot as plt
+import os
 
-def startParse(filename):
+#File must be in txt/yourfile.txt
+#Once run, will create folder with File name with all tiers within
+FILE_NAME = 'P1_e20160630_174419_013088.txt'
 
-    
-    
+def startParse():
+    filename = FILE_NAME
     timeOffset = findBeginning(filename)
     timeOffset,date,time = userInput(timeOffset)
                
@@ -32,11 +37,12 @@ def startParse(filename):
     sa = pd.DataFrame(columns=['Time','Action'])
     #uniqueColumns = findAnnotations(filename,tier)
     
-    
     count = 0
     while len(x) != 1:
+        print index
         tier = tiers[index]
         count = count + 1
+        print x, len(x)
             
         if tier == x[0] and len(x) == 9:
             action = x[-1][:-1]
@@ -49,13 +55,13 @@ def startParse(filename):
         else:
             timeDf = createDFTime(timeOffset,end,increment,unixTime,timeOffset)
             sa = timeDf.merge(sa,on="Time",how="left")
-            labelAnnotations(tier,sa)
+            labelAnnotations(filename,tier,sa)
             #sa.to_csv("csv/{}.csv".format(tier))
             sa = pd.DataFrame(columns=['Time','Action'])
             index = index + 1
     timeDf = createDFTime(timeOffset,end,increment,unixTime,timeOffset)
     sa = timeDf.merge(sa,on="Time",how="left")
-    labelAnnotations(tier,sa)
+    labelAnnotations(filename,tier,sa)
     #sa.to_csv("csv/{}.csv".format(tier))
     
             
@@ -248,10 +254,9 @@ def unix(timeStamp,dateStamp="1970-01-01"):
     return dateUnix+timeUnix+timeUnix2
     
     
-def labelAnnotations(tierName,dataframe):
+def labelAnnotations(filename,tierName,dataframe):
     print tierName
     temp = dataframe
-    
     uniqueValues = np.unique(temp[['Action']])
     
     counter = 0
@@ -279,14 +284,18 @@ def labelAnnotations(tierName,dataframe):
     
     for x in range(0,len(temp)):
         if action[x] in uniqueValues[:]:
-            print "Changing index: ", x
             sa[action[x]].iloc[x] = 1
+            print x
             
+    
     if len(uniqueValues) > 1:        
         sa = sa.drop(float('NaN'),axis=1)
-    sa.to_csv('csv/{}.csv'.format(tierName))
+    
+    directory = 'csv/{}'.format(FILE_NAME[:-4])
+    tierName = tierName.split("/")
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    #sa.drop('Action', axis=1, inplace=True)
+    sa.to_csv('csv/{}/{}{}.csv'.format(FILE_NAME[:-4],filename[:-4],tierName[0]))
 
-
-#txt file must be in txt/filename.txt
-startParse('P1_e20160630_174419_013088.txt')
-#labelAnnotations("csv/Comments.csv")
+startParse()
