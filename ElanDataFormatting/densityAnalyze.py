@@ -22,7 +22,7 @@ def pregenerate():
     yesNo = raw_input("1) Process\n2) Statistics\n")
     
     
-    df = pd.DataFrame(columns=['Category','Duration','Density'])
+    df = pd.DataFrame(columns=['Category','Duration','Density', 'Max Duration', 'Mean Duration'])
     df2 = pd.DataFrame(columns=['Participant','Total Duration (Seconds)','Duration Mean', 'Duration Median', 'Duration Standard Dev', 'Total Occurring Episodes','Total Categorized Episodes', 'Total Categorized Episodes Duration Mean', 'Total Categorized Episodes Duration Max', 'Total Categorized Episodes Duration Median'])
     
     counter = 0
@@ -63,10 +63,8 @@ def processFile(filename):
     df['Duration'] = duration
     dfCat['Duration1'] = duration1
         
-    print "hey"
     df2 = pd.DataFrame(columns=['Participant','Total Duration (Seconds)','Duration Mean', 'Duration Median', 'Duration Standard Dev', 'Total Occurring Episodes','Total Categorized Episodes', 'Total Categorized Episodes Duration Mean', 'Total Categorized Episodes Duration Max', 'Total Categorized Episodes Duration Median'])
     df2['Participant'] = [participant]
-    print df2['Participant']
     df2['Total Duration (Seconds)'] = [df['Duration'].sum()]
     df2['Duration Mean'] = [df['Duration'].mean()]
     df2['Duration Median'] = [df['Duration'].median()]
@@ -81,10 +79,12 @@ def processFile(filename):
 #Find all occurrences where category is labeled yes or no and store in dataframe
 def process(filename, counter): 
     print counter
-    df = pd.DataFrame(columns=['Category','Duration','Density'])
+    df = pd.DataFrame(columns=['Category','Duration','Density','Max Duration', 'Mean Duration'])
     categories=[]
     duration=[]
     density=[]
+    meanDuration = []
+    maxDuration = []
     s = open("csv/categories/{}".format(filename), 'r')
     x = s.readline().split(",")
     
@@ -92,17 +92,21 @@ def process(filename, counter):
     while len(y) != 1:
         if y[1] != "":
             categories.append(y[1])
-            duration.append(float(y[-2]))
-            density.append(float(y[-1][:-1]))
+            duration.append(float(y[-4]))
+            density.append(float(y[-3]))
+            maxDuration.append(float(y[-2]))
+            meanDuration.append(float(y[-1]))
         y = s.readline().split(",")
     df['Category'] = categories
     df['Duration'] = duration
     df['Density'] = density
+    df['Max Duration'] = maxDuration
+    df['Mean Duration'] = meanDuration
     return df
     
 def execute():
-    yes = np.zeros(11)
-    detected = np.zeros(11)
+    yes = np.zeros(50)
+    detected = np.zeros(50)
     df = pd.DataFrame(columns=['Density','Category'])
     if os.path.isfile("csv/categories/compile.csv"):
         s = open("csv/categories/compile.csv", 'r')
@@ -110,17 +114,23 @@ def execute():
         x = s.readline().split(",")
     yesNo = raw_input("Would you like to specify duration constraint?\n(y/n)\n")
     if yesNo == "y":
-        constraint = raw_input("Please provide a constraint\n")
+        mode = raw_input("Set your x axis:\n1) Density\n2) Max Duration\n3) Mean Duration")
         if yesNo:
+            constraint = raw_input("Please provide a constraint\n")
             while len(x) != 1:
-                ans = int(10*round(float(x[3]),1))
+                if mode == "1":
+                    ans = int(10*round(float(x[3]),1))
+                elif mode == "2":
+                    ans = int(round(float(x[4])))
+                elif mode == "3":
+                    ans = int(round(float(x[5])))
                 if (x[1] == "yes") and (float(constraint) <= float(x[2])):
                     print x[2]
                     yes[ans] = yes[ans] + 1
                 if (float(constraint) <= float(x[2])):
                     detected[ans] = detected[ans] + 1
                 x = s.readline().split(",")
-            graph(yes, detected)
+            graph(yes, detected, mode)
         else:
             while len(x) != 1:
                 ans = int(10*round(float(x[3]),1))
@@ -129,19 +139,25 @@ def execute():
                     yes[ans] = yes[ans] + 1
                     detected[ans] = detected[ans] + 1
                 x = s.readline().split(",")
-            graph(yes, detected)
+            graph(yes, detected, mode)
         
-def graph(yes, detected):
-    xVals = [0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1]
-    print yes
-    print detected
+def graph(yes, detected, mode):
+    if (mode == "1"): #density
+        xVals = []
+        for x in range(0,50,1):
+            xVals.append(x*.1)
+    elif (mode == "2" or mode == "3"): #mean or max
+        xVals = []
+        for x in range(0,50,1):
+            xVals.append(x)
+        
     density = yes/detected
     df = pd.DataFrame(columns=['xVals','Density'])
-    print xVals
-    print density
     df['xVals'] = xVals
     df['Density'] = density
     df = df.set_index(['xVals'])
+    df=df.dropna()
+    print df
     ax = df['Density'].plot()
     ax.set_ylim(0,1.2)
     

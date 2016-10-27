@@ -17,14 +17,7 @@ import collections
 import os
 
 #creates the episodes given a text file associated with tier
-FILE_NAME = 'P1_e20160630_174419_013088.txt'
-
-#P1_e20160630_174419_013088.txt'
-
-#,'p2_pre _e20160630_175407_013089.txt','P2Post_e20160708_143516_013089.txt',
- #             'p3 post _ e20160710_123024_013089.txt','p3 pre_e20160705_171307_013088.txt','p4 post_ e20160710_123200_013088.txt',
-  #            'p5 post_ e20160830_152743_013088.txt','P5 pre _ e20160718_141513_013088.txt','p6 post _ e20160830_153103_013089.txt',
-  #           'p6 pre_ e20160718_142108_013089.txt']
+FILE_NAME = 'p6 pre_ e20160718_142108_013089.txt'
               
         
 def histogram():
@@ -183,7 +176,7 @@ def createCSV(episode, end, sel, annotation):
         os.makedirs(directory) 
     df.to_csv("csv/{}/{}{}episode.csv".format(FILE_NAME[:-4],FILE_NAME[:-4],annotation))
     
-
+#This will create the csv #-minute density csv
 def density(episode, annotation, sel):
     columnNames = []
     columnNames.append('Category')
@@ -191,6 +184,8 @@ def density(episode, annotation, sel):
     columnNames.append('End Time')
     columnNames.append('{} duration'.format(annotation))
     columnNames.append('{} density'.format(annotation))
+    columnNames.append('{} max duration'.format(annotation))
+    columnNames.append('{} mean duration'.format(annotation))
     df = pd.DataFrame(columns=columnNames)
     fileDest = FILE_NAME[:-4]
     totalindexvalues = returnPandasIndex()
@@ -200,6 +195,8 @@ def density(episode, annotation, sel):
         endTime = []
         duration = []
         density = []
+        maxDuration = []
+        meanDuration = []
         for key in minepisode:
             start = key
             end = minepisode[key]
@@ -210,7 +207,11 @@ def density(episode, annotation, sel):
             start = np.where(totalindexvalues == start)[0][0]
             end = np.where(totalindexvalues == end)[0][0]
             dura = findDuration(tempDf,start,end, annotation)
+            ma = findMax(tempDf,start,end,annotation)
+            me = findMean(tempDf,start,end,annotation)
             duration.append(dura)
+            maxDuration.append(ma)
+            meanDuration.append(me)
             density.append("{0:.2f}".format(dura/float(totalduration)))
         
         #print timeRange, duration, density
@@ -218,19 +219,64 @@ def density(episode, annotation, sel):
         df['End Time'] = endTime
         df['{} duration'.format(annotation)] = duration
         df['{} density'.format(annotation)] = density
+        df['{} max duration'.format(annotation)] = maxDuration
+        df['{} mean duration'.format(annotation)] = meanDuration
         
     df.to_csv("csv/{}/{}_{}_Min_Density.csv".format(fileDest,fileDest,sel[0]))
     
+#finds total duration of crying occurrences in an episode
 def findDuration(dataframe, start, end, annotation):
     listtemp = dataframe.ix[start:end, annotation]
     total = 0
+    print listtemp
     for element in listtemp:
         if element == 1:
             total = total + 1
             
     number = total * .1
     return number
+
+#finds the max duration of crying occurrence in an episode
+def findMax(dataframe, start, end, annotation):
+    listtemp = dataframe.ix[start:end, annotation]
+    total = 0
+    maxDuration = 0
+    compare = False
+    for element in listtemp:
+        if element == 1:
+            total = total + 1
+            compare = True
+        elif element == 0 and compare:
+            compare = False
+            if total > maxDuration:
+                maxDuration = total
+            total = 0
+    if compare:
+        if total > maxDuration:
+            maxDuration = total
+            
+    maxDuration = maxDuration * .1
+    return maxDuration
     
+#finds the mean duration of crying occurrence in an episode
+def findMean(dataframe, start, end, annotation):
+    listtemp = dataframe.ix[start:end, annotation]
+    meanList = []
+    total = 0
+    compare = False
+    for element in listtemp:
+        if element == 1:
+            total = total + 1
+            compare = True
+        elif element == 0 and compare:
+            compare = False
+            meanList.append(total)
+            total = 0
+    if compare:
+        meanList.append(total)
+            
+    mean = sum(meanList)/len(meanList) * .1
+    return mean
     
 def getDataFrame(annotation):
     return pd.read_csv('csv/{}/{}'.format(FILE_NAME[:-4],FILE_DENSITY), usecols=[annotation])
