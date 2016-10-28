@@ -10,6 +10,7 @@ import os.path
 import pandas as pd
 import numpy as np
 
+import matplotlib.pyplot as plt
 import datetime as datetime
 from datetime import date, timedelta
 from time import mktime
@@ -114,28 +115,28 @@ def execute():
         x = s.readline().split(",")
     yesNo = raw_input("Would you like to specify duration constraint?\n(y/n)\n")
     if yesNo == "y":
-        mode = raw_input("Set your x axis:\n1) Density\n2) Max Duration\n3) Mean Duration")
+        mode = raw_input("Set your x axis:\n1) Density\n2) Max Duration\n3) Mean Duration\n")
         if yesNo:
-            constraint = raw_input("Please provide a constraint\n")
-            while len(x) != 1:
-                if mode == "1":
-                    ans = int(10*round(float(x[3]),1))
-                elif mode == "2":
-                    ans = int(round(float(x[4])))
-                elif mode == "3":
-                    ans = int(round(float(x[5])))
-                if (x[1] == "yes") and (float(constraint) <= float(x[2])):
-                    print x[2]
-                    yes[ans] = yes[ans] + 1
-                if (float(constraint) <= float(x[2])):
-                    detected[ans] = detected[ans] + 1
-                x = s.readline().split(",")
-            graph(yes, detected, mode)
+            constraint = raw_input("Please provide a constraint\n").split(",")
+            for som in constraint:
+                
+                while len(x) != 1:
+                    if mode == "1":
+                        ans = int(10*round(float(x[3]),1))
+                    elif mode == "2":
+                        ans = int(round(float(x[4])))
+                    elif mode == "3":
+                        ans = int(round(float(x[5])))
+                    if (x[1] == "yes") and (float(som) <= float(x[2])):
+                        yes[ans] = yes[ans] + 1
+                    if (float(som) <= float(x[2])):
+                        detected[ans] = detected[ans] + 1
+                    x = s.readline().split(",")
+                graph(yes, detected, mode)
         else:
             while len(x) != 1:
                 ans = int(10*round(float(x[3]),1))
                 if (x[1] == "yes"):
-                    print x[2]
                     yes[ans] = yes[ans] + 1
                     detected[ans] = detected[ans] + 1
                 x = s.readline().split(",")
@@ -152,14 +153,25 @@ def graph(yes, detected, mode):
             xVals.append(x)
         
     density = yes/detected
-    df = pd.DataFrame(columns=['xVals','Density'])
+    df = pd.DataFrame(columns=['xVals','Density','detected'])
+    df['detected']= detected
     df['xVals'] = xVals
     df['Density'] = density
     df = df.set_index(['xVals'])
     df=df.dropna()
-    print df
+    #find size of array and iterate with scatter while changing size of s
     ax = df['Density'].plot()
+    dfDens = df['Density'].values
+    dfIndex = df.index.values
+    dfdetected = df['detected'].values
+    
     ax.set_ylim(0,1.2)
+    ax.set_xlim(-(dfIndex[1]-dfIndex[0]),dfIndex.max())
+    for cnt in range(0,len(dfdetected)): #Plot marker here!
+        plt.scatter(float(dfIndex[cnt]), float(dfDens[cnt]),# x, y, marker size, color, marker type
+                   s = 100* float(dfdetected[cnt]), 
+                    c = 1, 
+                    marker = "o")
     
 def stringToTime(arg):
     offset2 = float(arg[-4:])
