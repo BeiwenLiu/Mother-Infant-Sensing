@@ -21,10 +21,10 @@ def pregenerate():
     
     
     yesNo = raw_input("1) Process\n2) Statistics\n")
-    
+    maxValue = float(raw_input("Value please:\n"))
     
     df = pd.DataFrame(columns=['Category','Duration','Density', 'Max Duration', 'Mean Duration'])
-    df2 = pd.DataFrame(columns=['Participant','Total Duration (Seconds)','Duration Mean', 'Duration Median', 'Duration Standard Dev', 'Total Occurring Episodes','Total Categorized Episodes', 'Total Categorized Episodes Duration Mean', 'Total Categorized Episodes Duration Max', 'Total Categorized Episodes Duration Median'])
+    df2 = pd.DataFrame(columns=['Participant'])
     
     counter = 0
     for file in os.listdir("csv/categories"):
@@ -33,49 +33,91 @@ def pregenerate():
                 tempDf = process(file,counter) #Only for analyzing category annotated rows
                 df = pd.concat([df,tempDf],ignore_index=True)
             elif (yesNo == "2"):
-                tempDf = processFile(file)
+                tempDf = processFile(file,maxValue)
                 df2 = pd.concat([df2,tempDf],ignore_index=True)
             
     if (yesNo == "1"):      
         df.to_csv("csv/categories/compile.csv")
     elif (yesNo == "2"):
+        someDf = findTotalDuration()
+        df2 = df2.merge(someDf,how="left",left_index=True,right_index=True) #Merge original dataframe with the dataframe that contains the total duration of participant
+        df2['% Episode Start to End / Total'] = df2['Episode (Start to End) Duration']/df2['Total Duration of Participant'] * 100
+        df2['% Episode Analyzed / Total'] = df2['Total Duration - Actual Duration Analyzed']/df2['Total Duration of Participant'] * 100
         df2.to_csv("csv/categories/{}stats.csv".format("stats.csv"))
     
 #Find mean, median, and std for count and duration of episode per 16 hour recording
-def processFile(filename):
+def processFile(filename,maxValue):
+    
     s = open("csv/categories/{}".format(filename), 'r')
     dfCat = pd.DataFrame(columns=['Duration1'])
     df = pd.DataFrame(columns=['Duration'])
+    dfMax = pd.DataFrame(columns=['Duration'])
     x = s.readline().split(",")
     counter = 1
     participant = filename
-    duration = []
-    duration1 = []
+    duration = [] #episode duration
+    duration1 = [] #categorized episode total duration
     count = 0
     y = s.readline().split(",")
+    foundStart1 = False
+    foundStart = False
+    start = stringToTime(y[2])
+    maxCount = 0
+    durationMax = []
     while len(y) != 1:
         if (y[1] != ""):
             count = count + 1
-            duration1.append(float(y[-2]))
+            duration1.append(stringToTime(y[3]) - stringToTime(y[2]))
+            if float(y[6]) > maxValue:
+                durationMax.append(stringToTime(y[3])-stringToTime(y[2]))
+                maxCount = maxCount + 1
+            if foundStart1 == False:
+                start1 = stringToTime(y[2])
+                foundStart1 = True
+                
+        if foundStart1:
+            end1 = stringToTime(y[3])
+        
         duration.append(stringToTime(y[3]) - stringToTime(y[2]))
         
         counter = counter + 1
+        end = stringToTime(y[3])
         y = s.readline().split(",")
+    
     df['Duration'] = duration
     dfCat['Duration1'] = duration1
-        
-    df2 = pd.DataFrame(columns=['Participant','Total Duration (Seconds)','Duration Mean', 'Duration Median', 'Duration Standard Dev', 'Total Occurring Episodes','Total Categorized Episodes', 'Total Categorized Episodes Duration Mean', 'Total Categorized Episodes Duration Max', 'Total Categorized Episodes Duration Median'])
+    dfMax['Duration'] = durationMax
+
+    df2 = pd.DataFrame(columns=['Participant'])
     df2['Participant'] = [participant]
-    df2['Total Duration (Seconds)'] = [df['Duration'].sum()]
-    df2['Duration Mean'] = [df['Duration'].mean()]
-    df2['Duration Median'] = [df['Duration'].median()]
-    df2['Duration Standard Dev'] = [df['Duration'].std()]
+    df2['Total Duration - Actual Duration Analyzed'] = [df['Duration'].sum()]
     df2['Total Occurring Episodes'] = [counter]
     df2['Total Categorized Episodes'] = [count]
-    df2['Total Categorized Episodes Duration Mean'] = [dfCat['Duration1'].mean()]
-    df2['Total Categorized Episodes Duration Max'] = [dfCat['Duration1'].max()]
-    df2['Total Categorized Episodes Duration Median'] = [dfCat['Duration1'].median()]
+    df2['Total Categorized Episodes Duration Sum - Actual Duration Analyzed'] = [dfCat['Duration1'].sum()]
+    df2['Episode (Start to End) Duration'] = [end-start]
+    df2['Categorized Episode (Start to End) Duration'] = [end1-start1]
+    df2['Episode Count above Max Threshold'] = maxCount
+    df2['Episode Duration above Max Threshold - Actual Duration Analyzed'] = [dfMax['Duration'].sum()]
     return df2
+    
+#iterate through all text files to find total duration of participant
+def findTotalDuration():
+    df = pd.DataFrame(columns=['Total Duration of Participant'])
+    totalDuration = []
+    for file in os.listdir("txt/participants"):
+        if file.endswith("txt"):
+            totalDuration.append(findTxt(file))
+    df['Total Duration of Participant'] = totalDuration
+    return df
+def findTxt(filename):
+    s = open("txt/participants/{}".format(filename), "r")
+
+    y = s.readline().split("\t")
+    start = stringToTime(y[2])
+    while len(y) != 1:
+        end = stringToTime(y[4])
+        y = s.readline().split("\t")
+    return end-start
     
 #Find all occurrences where category is labeled yes or no and store in dataframe
 def process(filename, counter): 
@@ -164,6 +206,8 @@ def graph(yes, detected, mode):
     dfDens = df['Density'].values
     dfIndex = df.index.values
     dfdetected = df['detected'].values
+
+    print df
     
     ax.set_ylim(0,1.2)
     ax.set_xlim(-(dfIndex[1]-dfIndex[0]),dfIndex.max())

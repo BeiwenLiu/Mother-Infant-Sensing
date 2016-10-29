@@ -207,7 +207,7 @@ def density(episode, annotation, sel):
             start = np.where(totalindexvalues == start)[0][0]
             end = np.where(totalindexvalues == end)[0][0]
             dura = findDuration(tempDf,start,end, annotation)
-            ma = findMax(tempDf,start,end,annotation)
+            ma = findMax(tempDf,start,end,annotation) #This is added to be able to graph using different x axis
             me = findMean(tempDf,start,end,annotation)
             duration.append(dura)
             maxDuration.append(ma)
