@@ -43,7 +43,18 @@ def pregenerate():
         df2 = df2.merge(someDf,how="left",left_index=True,right_index=True) #Merge original dataframe with the dataframe that contains the total duration of participant
         df2['% Episode Start to End / Total'] = df2['Episode (Start to End) Duration']/df2['Total Duration of Participant'] * 100
         df2['% Episode Analyzed / Total'] = df2['Total Duration - Actual Duration Analyzed']/df2['Total Duration of Participant'] * 100
+        #Execute(max constraint) here
+        print "Accuracy: " + str(round(100*execute1(maxValue),2)) + "%"
+        plot(df2)
         df2.to_csv("csv/categories/{}stats.csv".format("stats.csv"))
+    
+def plot(df):
+    print "graph"
+    #df['Episode (Start to End) Duration'].hist()
+    #df['Categorized Episode (Start to End) Duration'].hist()
+    #df['Total Occurring Episodes'].hist()
+    #df['Total Categorized Episodes'].hist()
+    
     
 #Find mean, median, and std for count and duration of episode per 16 hour recording
 def processFile(filename,maxValue):
@@ -147,6 +158,53 @@ def process(filename, counter):
     df['Mean Duration'] = meanDuration
     return df
     
+def execute1(som):
+    yes = np.zeros(50)
+    detected = np.zeros(50)
+    df = pd.DataFrame(columns=['Density','Category'])
+    if os.path.isfile("csv/categories/compile.csv"):
+        s = open("csv/categories/compile.csv", 'r')
+        x = s.readline().split(",")
+        x = s.readline().split(",")
+        while len(x) != 1:
+            ans = int(round(float(x[4])))
+            if (x[1] == "yes") and (float(som) <= float(x[2])):
+                yes[ans] = yes[ans] + 1
+            if (float(som) <= float(x[2])):
+                detected[ans] = detected[ans] + 1
+            x = s.readline().split(",")
+        return get(yes, detected,som)
+                
+def get(yes, detected,som):
+    xVals = []
+    for x in range(0,50,1):
+        xVals.append(x)
+        
+    density = yes/detected
+    df = pd.DataFrame(columns=['xVals','Density','detected'])
+    df['detected']= detected
+    df['xVals'] = xVals
+    df['Density'] = density
+    
+    df = df.set_index(['xVals'])
+    df=df.dropna()
+    weights = []
+
+    dfDens = df['Density'].values
+    dfIndex = df.index.values
+    dfdetected = df['detected'].values
+    weightsTotal = []
+    
+    for y in range(0,len(dfdetected)):
+        if dfIndex[y] >= som:
+            weightsTotal.append(dfdetected[y])
+            
+    for x in range(0,len(dfIndex)):
+        if dfIndex[x] >= som:
+            weights.append(dfdetected[x]/sum(weightsTotal) * dfDens[x])
+            
+    return sum(weights)
+    
 def execute():
     yes = np.zeros(50)
     detected = np.zeros(50)
@@ -207,7 +265,6 @@ def graph(yes, detected, mode):
     dfIndex = df.index.values
     dfdetected = df['detected'].values
 
-    print df
     
     ax.set_ylim(0,1.2)
     ax.set_xlim(-(dfIndex[1]-dfIndex[0]),dfIndex.max())
@@ -224,7 +281,7 @@ def stringToTime(arg):
     return offset2+total
 #use this when you want to compile all files into compile.csv
 #or generate files with statstics
-#pregenerate()
+pregenerate()
 
 #use execute when you have already compiled all the files into one category file called compile.csv          
-execute()
+#execute()

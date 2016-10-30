@@ -79,7 +79,7 @@ def labelAnnotations(tierName,dataframe):
     
     sa = pd.concat([sa,temp],ignore_index=True)
     
-    sa.to_csv("aaasfasf.csv")
+    #sa.to_csv("list.csv") list of all crying vocalizations and durations
     sel = raw_input("Select one or multiple episodes - (1,2,5,10,20) minutes\n")
     sel = sel.split(",")
     episodeArray = []
