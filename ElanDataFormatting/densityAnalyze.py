@@ -251,8 +251,15 @@ def graph(yes, detected, mode):
         xVals = []
         for x in range(0,50,1):
             xVals.append(x)
+            
+    indexReplace = int(raw_input("Indicate xVal threshold:\n"))
         
     density = yes/detected
+    
+    xVals = xVals[indexReplace:]
+    density = density[indexReplace:]
+    detected = detected[indexReplace:]
+
     df = pd.DataFrame(columns=['xVals','Density','detected'])
     df['detected']= detected
     df['xVals'] = xVals
@@ -260,7 +267,7 @@ def graph(yes, detected, mode):
     df = df.set_index(['xVals'])
     df=df.dropna()
     #find size of array and iterate with scatter while changing size of s
-    ax = df['Density'].plot()
+    ax = df['Density'].plot(title="Accuracy vs Max Duration")
     dfDens = df['Density'].values
     dfIndex = df.index.values
     dfdetected = df['detected'].values
@@ -273,6 +280,11 @@ def graph(yes, detected, mode):
                    s = 100* float(dfdetected[cnt]), 
                     c = 1, 
                     marker = "o")
+    ax.set_xlabel("Max Duration (seconds)");
+    ax.set_ylabel("Accuracy");
+
+    df['detected'].to_csv("detected.csv");
+    
     
 def stringToTime(arg):
     offset2 = float(arg[-4:])
@@ -281,7 +293,7 @@ def stringToTime(arg):
     return offset2+total
 #use this when you want to compile all files into compile.csv
 #or generate files with statstics
-pregenerate()
+#pregenerate()
 
 #use execute when you have already compiled all the files into one category file called compile.csv          
-#execute()
+execute()

@@ -18,7 +18,7 @@ import os
 
 #File must be in txt/yourfile.txt
 #Once run, will create folder with File name with all tiers within
-FILE_NAME = 'P1_e20160630_174419_013088.txt'
+FILE_NAME = 'Labsess1.SM.txt'
 
 def startParse():
     filename = FILE_NAME
@@ -295,7 +295,7 @@ def labelAnnotations(filename,tierName,dataframe):
     tierName = tierName.split("/")
     if not os.path.exists(directory):
         os.makedirs(directory)
-    #sa.drop('Action', axis=1, inplace=True)
+    #sa.drop('Action', axis=1, inplace=True) to drop action column for jatin
     sa.to_csv('csv/{}/{}{}.csv'.format(FILE_NAME[:-4],filename[:-4],tierName[0]))
 
 startParse()
