@@ -75,6 +75,8 @@ def processFile(filename,maxValue):
     start = stringToTime(y[2])
     maxCount = 0
     durationMax = []
+    counterAboveThreshold = 0
+    durationAboveThreshold = []
     while len(y) != 1:
         if (y[1] != ""):
             count = count + 1
@@ -90,7 +92,9 @@ def processFile(filename,maxValue):
             end1 = stringToTime(y[3])
         
         duration.append(stringToTime(y[3]) - stringToTime(y[2]))
-        
+        if float(y[6]) > maxValue:
+            counterAboveThreshold = counterAboveThreshold + 1
+            durationAboveThreshold.append(float(str(stringToTime(y[3]) - stringToTime(y[2]))))
         counter = counter + 1
         end = stringToTime(y[3])
         y = s.readline().split(",")
@@ -109,6 +113,8 @@ def processFile(filename,maxValue):
     df2['Categorized Episode (Start to End) Duration'] = [end1-start1]
     df2['Episode Count above Max Threshold'] = maxCount
     df2['Episode Duration above Max Threshold - Actual Duration Analyzed'] = [dfMax['Duration'].sum()]
+    df2['Episode not identified Count above Max Threshold'] = counterAboveThreshold
+    df2['Episode not identified Duration above Max Threshold'] = sum(durationAboveThreshold)
     return df2
     
 #iterate through all text files to find total duration of participant
@@ -267,7 +273,7 @@ def graph(yes, detected, mode):
     df = df.set_index(['xVals'])
     df=df.dropna()
     #find size of array and iterate with scatter while changing size of s
-    ax = df['Density'].plot(title="Accuracy vs Max Duration")
+    ax = df['Density'].plot()
     dfDens = df['Density'].values
     dfIndex = df.index.values
     dfdetected = df['detected'].values
@@ -280,8 +286,9 @@ def graph(yes, detected, mode):
                    s = 100* float(dfdetected[cnt]), 
                     c = 1, 
                     marker = "o")
-    ax.set_xlabel("Max Duration (seconds)");
-    ax.set_ylabel("Accuracy");
+    ax.set_title("Crying episode accuracy assessment",fontsize=18)
+    ax.set_xlabel("Max duration of crying vocalization (seconds)", fontsize=16);
+    ax.set_ylabel("Accuracy",fontsize=16);
 
     df['detected'].to_csv("detected.csv");
     
@@ -293,7 +300,8 @@ def stringToTime(arg):
     return offset2+total
 #use this when you want to compile all files into compile.csv
 #or generate files with statstics
-#pregenerate()
+
+pregenerate()
 
 #use execute when you have already compiled all the files into one category file called compile.csv          
-execute()
+#execute()
